@@ -34,8 +34,8 @@ void showScaffoldMessage(context,String name){
     content: Text(name,maxLines : 2,style: const TextStyle(fontSize: 15)),
     duration: const Duration(milliseconds: 1700),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-    margin: EdgeInsets.only(
-      bottom: MediaQuery.of(context).size.height - 170,
+    margin: const EdgeInsets.only(
+      bottom: 20,
       left: 16,
       right: 16,
     ),
@@ -56,6 +56,61 @@ void showBanner(context,String name){
         ),
       ],
     ),
+  );
+}
+
+void showAlertDialogBox(BuildContext context,String title, String message) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Close the dialog
+            },
+            child: const Text("CLOSE"),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+void showDialogBox({
+  required BuildContext context,
+  required String title,
+  required String message,
+  String confirmText = "OK",
+  String cancelText = "Cancel",
+  VoidCallback? onConfirm,
+}) {
+  showDialog(
+    context: context,
+    barrierDismissible: false, // Prevent closing when tapping outside
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(), // Close dialog
+            child: Text(cancelText),
+          ),
+          TextButton(
+            onPressed: () {
+              if (onConfirm != null) {
+                onConfirm();
+              }
+              Navigator.of(context).pop(); // Close dialog
+            },
+            child: Text(confirmText),
+          ),
+        ],
+      );
+    },
   );
 }
 

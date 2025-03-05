@@ -1,8 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:rpro_mini/fcm/access_firebase_token.dart';
 
-import '../../fcm/access_firebase_token.dart';
-
 part 'brand_vo.g.dart';
 
 @JsonSerializable()

@@ -11,11 +11,10 @@ import '../responses/login_response.dart';
 import '../responses/post_method_response.dart';
 import '../responses/product_response.dart';
 import '../responses/size_response.dart';
+import '../responses/slider_response.dart';
 import '../responses/sub_category_response.dart';
 
 abstract class ShoppyAdminAgent{
-
-  Future<PostMethodResponse?> addColor(String token,ColorRequestVo request);
 
   Future<ColorResponse?> getColors(String token,);
 
@@ -52,4 +51,6 @@ abstract class ShoppyAdminAgent{
   Future<PostMethodResponse?> updateProductById(String token,int id,ProductRequestVo body);
 
   Future<LoginResponse?> adminLogin(String name, String password);
+
+  Future<SliderResponse?> getSliders(String token);
 }

@@ -8,3 +8,4 @@ const String kEndPointCategories = "/api/categories";
 const String kEndPointSubCategories = "/api/subCategories";
 const String kEndPointProducts = "/api/products";
 const String kEndPointAdminAuth = "/api/admin/login";
+const String kEndPointSlider = "/api/sliders";

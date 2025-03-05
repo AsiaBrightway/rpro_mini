@@ -2,7 +2,7 @@ import 'dart:ui';
 
 class AppColors{
   static Color colorPrimary = const Color.fromRGBO(79, 45, 127, 1);
-  // static Color colorPrimary = const Color.fromRGBO(209, 169, 240, 1);
+  static Color stockQtyColor = const Color.fromRGBO(14, 120, 28, 1.0);
   static Color colorOtp = const Color.fromRGBO(255, 125, 30, 1);
   static Color colorSecondaryText = const Color.fromRGBO(0, 0, 0, 0.5);
   static Color colorSeeAll = const Color.fromRGBO(111, 68, 209, 1);

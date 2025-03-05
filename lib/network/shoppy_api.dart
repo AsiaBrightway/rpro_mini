@@ -1,8 +1,6 @@
-
 import 'package:dio/dio.dart';
 import 'package:retrofit/http.dart';
 import 'package:rpro_mini/data/vos/request/size_request.dart';
-import 'package:rpro_mini/fcm/access_firebase_token.dart';
 import 'package:rpro_mini/network/responses/brand_response.dart';
 import 'package:rpro_mini/network/responses/category_response.dart';
 import 'package:rpro_mini/network/responses/color_response.dart';
@@ -11,20 +9,22 @@ import 'package:rpro_mini/network/responses/parse_error_logger.dart';
 import 'package:rpro_mini/network/responses/post_method_response.dart';
 import 'package:rpro_mini/network/responses/product_response.dart';
 import 'package:rpro_mini/network/responses/size_response.dart';
+import 'package:rpro_mini/network/responses/slider_response.dart';
 import 'package:rpro_mini/network/responses/sub_category_response.dart';
 import '../data/vos/request/color_request_vo.dart';
 import '../data/vos/request/product_request_vo.dart';
 import 'api_constants.dart';
 part 'shoppy_api.g.dart';
 
-@RestApi(baseUrl: kBaseUrl)
+@RestApi()
 abstract class ShoppyApi{
 
   factory ShoppyApi(Dio dio) = _ShoppyApi;
 
-  @POST(kEndPointColors)
+  @POST("{url}$kEndPointBrands")
   Future<PostMethodResponse?> addColor(
       @Header(kParamAuthorization) String apiKey,
+      @Path("url") String url,
       @Body() ColorRequestVo requestBody
       );
 
@@ -121,6 +121,11 @@ abstract class ShoppyApi{
       @Header(kParamAuthorization) String apiKey,
       @Path("id") int id,
       @Body() ProductRequestVo body
+      );
+
+  @GET(kEndPointSlider)
+  Future<SliderResponse?> getSliders(
+      @Header(kParamAuthorization) String apiKey,
       );
 
   @POST(kEndPointAdminAuth)

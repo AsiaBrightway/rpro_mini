@@ -35,8 +35,8 @@ class _BrandPageState extends State<BrandsPage> {
 
   Future<void> _initializeData() async{
     final authModel = Provider.of<AuthProvider>(context,listen: false);
-    _token = authModel.accessToken;
-    _refreshToken = authModel.refreshToken;
+    _token = authModel.userName;
+    _refreshToken = authModel.password;
   }
 
   Future<void> _deleteBrand(int index) async{

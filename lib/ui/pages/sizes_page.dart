@@ -17,7 +17,6 @@ class SizesPage extends StatefulWidget {
 
 class _SizesPageState extends State<SizesPage> {
   String _token = '';
-  String _refreshToken = '';
   List<SizeVo> sizeList = [];
   final ShoppyAdminModel _model = ShoppyAdminModel();
 
@@ -30,8 +29,7 @@ class _SizesPageState extends State<SizesPage> {
 
   Future<void> _initializeData() async{
     final authModel = Provider.of<AuthProvider>(context,listen: false);
-    _token = authModel.accessToken;
-    _refreshToken = authModel.refreshToken;
+
   }
 
   Future<void> getSizeList() async {

@@ -1,64 +1,55 @@
 
-
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:rpro_mini/network/responses/login_response.dart';
-import '../data/models/shoppy_admin_model.dart';
 
 class AuthProvider extends ChangeNotifier{
-  String _accessToken = '';
-  String _refreshToken = '';
-  bool _isLoading = false;
-  String? _errorMessage;
+  String _userName = '';
+  String _password = '';
+  String _url = '';
 
-  bool get isLoading => _isLoading;
-  String? get errorMessage => _errorMessage;
-  String get accessToken => _accessToken;
-  String get refreshToken => _refreshToken;
-  final _model = ShoppyAdminModel();
+  String get url => _url;
+  String get password => _password;
+  String get userName => _userName;
 
   Future<void> loadToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    _accessToken = prefs.getString('token') ?? '';
-    _refreshToken = prefs.getString('refresh_token') ?? '';
+    _userName = prefs.getString('name') ?? '';
+    _password = prefs.getString('password') ?? '';
+    _url = prefs.getString('url') ?? '';
     notifyListeners();
   }
 
-  Future<void> saveTokenToDatabase(String token,String refreshToken) async{
+  Future<void> saveUrl(String url) async{
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('token', token);
-    await prefs.setString('refresh_token', refreshToken);
-    _accessToken = token;
-    _refreshToken = refreshToken;
+    await prefs.setString('url', url);
+  }
+
+  Future<void> saveTokenToDatabase(String name,String password) async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('name', name);
+    await prefs.setString('password', password);
+    _userName = name;
+    _password = password;
     notifyListeners();
   }
 
-  Future<void> clearTokenAndRoleAndId() async {
+  Future<void> logout() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('name');
+    await prefs.remove('password');
+    _userName = '';
+    _password = '';
+    notifyListeners();
+  }
+
+  Future<void> clearAllData() async{
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
     await prefs.remove('refresh_token');
-    _accessToken = '';
-    _refreshToken = '';
+    await prefs.remove('url');
+    _userName = '';
+    _url = '';
+    _password = '';
     notifyListeners();
-  }
-
-  Future<bool> loginWithEmail(String email, String password) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
-    try {
-      LoginResponse? response = await _model.adminLogin(email, password);
-      saveTokenToDatabase('Bearer ${response?.accessToken}', response?.refreshToken ?? '');
-      await Future.delayed(const Duration(milliseconds: 500));
-      _isLoading = false;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      _isLoading = false;
-      _errorMessage = e.toString();
-      notifyListeners();
-      return false;
-    }
   }
 }

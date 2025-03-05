@@ -9,6 +9,7 @@ import 'package:rpro_mini/data/vos/request/color_request_vo.dart';
 import 'package:rpro_mini/data/vos/request/product_request_vo.dart';
 import 'package:rpro_mini/data/vos/request/size_request.dart';
 import 'package:rpro_mini/data/vos/size_vo.dart';
+import 'package:rpro_mini/data/vos/slider_vo.dart';
 import 'package:rpro_mini/data/vos/sub_category_vo.dart';
 import 'package:rpro_mini/network/data_agents/shoppy_admin_agent.dart';
 import 'package:rpro_mini/network/data_agents/shoppy_admin_agent_impl.dart';
@@ -29,10 +30,6 @@ class ShoppyAdminModel{
 
   Future<LoginResponse?> adminLogin(String name,String password){
     return mDataAgent.adminLogin(name, password);
-  }
-
-  Future<PostMethodResponse?> addColor(String token,ColorRequestVo request){
-    return mDataAgent.addColor(token,request);
   }
   
   Future<List<ColorVo>> getColors(String token){
@@ -103,4 +100,7 @@ class ShoppyAdminModel{
     return mDataAgent.getProducts(token).asStream().map((response) => response?.products ?? []).first;
   }
 
+  Future<List<SliderVo>> getSliders(String token){
+    return mDataAgent.getSliders(token).asStream().map((response) => response?.data ?? []).first;
+  }
 }

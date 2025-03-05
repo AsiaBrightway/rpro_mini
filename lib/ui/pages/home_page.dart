@@ -1,14 +1,12 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:provider/provider.dart';
-import 'package:rpro_mini/ui/pages/box_fragment.dart';
-import 'package:rpro_mini/ui/pages/profile_fragment.dart';
-import 'package:rpro_mini/ui/pages/store_fragment.dart';
+import 'package:rpro_mini/data/vos/table_vo.dart';
+import 'package:rpro_mini/ui/pages/add_order_page.dart';
+import 'package:rpro_mini/ui/pages/setting_page.dart';
+import 'package:rpro_mini/ui/themes/colors.dart';
+import 'package:rpro_mini/utils/helper_functions.dart';
 import '../../bloc/auth_provider.dart';
-import '../themes/colors.dart';
-import 'add_item_fragment.dart';
-import 'home_fragment.dart';
+import '../../data/models/shoppy_admin_model.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -18,202 +16,90 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin{
-  late int currentPage;
-  late TabController tabController;
+  final ShoppyAdminModel _model = ShoppyAdminModel();
 
-  /// List of fragments (pages)
-  final List<Widget> _pages = [
-    const HomeFragment(),
-    const StoreFragment(),
-    const AddItemFragment(),
-    const BoxFragment(),
-    const ProfileFragment(),
+  final List<TableVo> tables = [
+    TableVo(1,"T003"),
+    TableVo(2,"T001"),
+    TableVo(3,"T005"),
+    TableVo(4,"T007"),
+    TableVo(5,"Table 5"),
+    TableVo(6,"Table 6"),
   ];
 
   @override
   void initState() {
-    currentPage = 0;
-    tabController = TabController(length: 5, vsync: this);
-    tabController.animation!.addListener(
-          () {
-        final value = tabController.animation!.value.round();
-        if (value != currentPage && mounted) {
-          changePage(value);
-        }
-      },
-    );
-    _initializeData();
     super.initState();
+    _initializeData();
   }
 
   Future<void> _initializeData() async{
     final authModel = Provider.of<AuthProvider>(context,listen: false);
     authModel.loadToken();
+    getSliders();
   }
 
-  void changePage(int newPage) {
-    setState(() {
-      currentPage = newPage;
+  Future<void> getSliders() async{
+    final authModel = Provider.of<AuthProvider>(context,listen: false);
+    //String url = authModel.url;
+    _model.getSliders('Bearer 45|0eLhFQLXwa2x1Z9LvQ4tXSwzL9yTSAuprmcubPoOc9948e0e').then((onValue){
+      setState(() {
+        showToastMessage(context,'slider success');
+      });
+    }).catchError((onError){
+      showToastMessage(context,'Failed to load slider');
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    const Color unselectedColor = Colors.black ;
     return Scaffold(
-      body: BottomBar(
-        fit: StackFit.expand,
-        borderRadius: BorderRadius.circular(500),
-        duration: const Duration(seconds: 1),
-        curve: Curves.decelerate,
-        showIcon: true,
-        barDecoration: const BoxDecoration(
-            boxShadow: [
-              BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 30,
-                  offset: Offset(0,10)
-              )
-            ]
+      appBar: AppBar(
+        title: const Text('R Pro',style: TextStyle(color: Colors.white)),
+        backgroundColor: AppColors.colorPrimary,
+        centerTitle: true,
+        automaticallyImplyLeading: false,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: GridView.builder(
+          padding: const EdgeInsets.only(top: 30),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3, // 3 columns
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+            childAspectRatio: 1.1,
+          ),
+          itemCount: tables.length,
+          itemBuilder: (context, index) {
+            return TableCard(table: tables[index]);
+          },
         ),
-        width: MediaQuery.of(context).size.width * 0.85,
-        barColor: Colors.white70,
-        start: 2,
-        end: 0,
-        offset: 10,
-        barAlignment: Alignment.bottomCenter,
-        reverse: false,
-        hideOnScroll: true,
-        scrollOpposite: false,
-        onBottomBarHidden: () {},
-        onBottomBarShown: () {},
-        body: (context, controller) => TabBarView(
-          controller: tabController,
-          dragStartBehavior: DragStartBehavior.down,
-          physics: const BouncingScrollPhysics(),
-          children: _pages,
-        ),
-        child: TabBar(
-          splashBorderRadius: BorderRadius.circular(42),
-          controller: tabController,
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          indicatorColor: Colors.transparent,
-          dividerColor: Colors.transparent,
-          tabs: [
-            ///home nav item
-            Material(
-              type: MaterialType.transparency, // Makes the splash effect transparent
-              child: InkWell(
-                splashColor: Colors.transparent, // Disables the splash color
-                highlightColor: Colors.transparent, // Disables the highlight effect
-                borderRadius: BorderRadius.circular(36), // Matches your tab's border radius
-                onTap: () {
-                  tabController.animateTo(0);
-                },
-                child: Container(
-                  height: MediaQuery.of(context).size.width * 0.092,
-                  width: MediaQuery.of(context).size.width * 0.12,
-                  decoration: BoxDecoration(
-                    color: currentPage == 0 ? AppColors.colorNavBackground : Colors.transparent,
-                    borderRadius: BorderRadius.circular(36),
-                  ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.home,
-                      color: unselectedColor,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Material(
-              type: MaterialType.transparency,
-              child: InkWell(
-                splashColor: Colors.transparent, // Disables the splash color
-                highlightColor: Colors.transparent, // Disables the highlight effect
-                borderRadius: BorderRadius.circular(36), // Matches your tab's border radius
-                onTap: () {
-                  tabController.animateTo(1);
-                },
-                child: Container(
-                  height: MediaQuery.of(context).size.width * 0.092,
-                  width: MediaQuery.of(context).size.width * 0.12,
-                  decoration: BoxDecoration(
-                      color: currentPage == 1 ? AppColors.colorNavBackground : Colors.transparent,
-                      borderRadius: BorderRadius.circular(36)
-                  ),
-                  child: Center(
-                      child: Image.asset('assets/store_vector.png',width: 22,height: 22,color: Colors.black,)),
-                ),
-              ),
-            ),
-            Material(
-              type: MaterialType.transparency,
-              child: InkWell(
-                splashColor: Colors.transparent, // Disables the splash color
-                highlightColor: Colors.transparent, // Disables the highlight effect
-                borderRadius: BorderRadius.circular(36), // Matches your tab's border radius
-                onTap: () {
-                  tabController.animateTo(2);
-                },
-                child: Container(
-                  height: MediaQuery.of(context).size.width * 0.092,
-                  width: MediaQuery.of(context).size.width * 0.12,
-                  decoration: BoxDecoration(
-                      color: currentPage == 2 ? AppColors.colorNavBackground : Colors.transparent,
-                      borderRadius: BorderRadius.circular(36)
-                  ),
-                  child: Center(
-                      child: Image.asset('assets/add_item.png',width: 20,height: 20,color: Colors.black,)
-                  ),
-                ),
-              ),
-            ),
-            Material(
-              type: MaterialType.transparency,
-              child: InkWell(
-                splashColor: Colors.transparent, // Disables the splash color
-                highlightColor: Colors.transparent, // Disables the highlight effect
-                borderRadius: BorderRadius.circular(36), // Matches your tab's border radius
-                onTap: () {
-                  tabController.animateTo(3);
-                },
-                child: Container(
-                  height: MediaQuery.of(context).size.width * 0.092,
-                  width: MediaQuery.of(context).size.width * 0.12,
-                  decoration: BoxDecoration(
-                      color: currentPage == 3 ? AppColors.colorNavBackground : Colors.transparent,
-                      borderRadius: BorderRadius.circular(36)
-                  ),
-                  child: Center(
-                      child: Image.asset('assets/box_vector.png',width: 20,height: 20,color: Colors.black,)
-                  ),
-                ),
-              ),
-            ),
-            Material(
-              type: MaterialType.transparency,
-              child: InkWell(
-                splashColor: Colors.transparent, // Disables the splash color
-                highlightColor: Colors.transparent, // Disables the highlight effect
-                borderRadius: BorderRadius.circular(36),
-                onTap: () {
-                  tabController.animateTo(4);
-                },
-                child: Container(
-                  height: MediaQuery.of(context).size.width * 0.09,
-                  width: MediaQuery.of(context).size.width * 0.12,
-                  decoration: BoxDecoration(
-                      color: currentPage == 4 ? AppColors.colorNavBackground : Colors.transparent,
-                      borderRadius: BorderRadius.circular(36)
-                  ),
-                  child: const Center(
-                      child: Icon(
-                        Icons.person,
-                        color: unselectedColor,
-                      )),
-                ),
-              ),
+      ),
+    );
+  }
+}
+
+class TableCard extends StatelessWidget {
+  final TableVo table;
+
+  const TableCard({super.key, required this.table});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      elevation: 4,
+      child: InkWell(
+        onTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => AddOrderPage()));
+        },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              table.name,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700,fontFamily: 'Ubuntu'),
             ),
           ],
         ),
@@ -221,5 +107,4 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     );
   }
 }
-
 

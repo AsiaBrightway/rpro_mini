@@ -1,8 +1,9 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rpro_mini/bloc/auth_provider.dart';
+import 'package:rpro_mini/ui/pages/login_page.dart';
+import 'package:rpro_mini/utils/helper_functions.dart';
+import '../../network/data_agents/shoppy_admin_agent_impl.dart';
 import '../themes/colors.dart';
 
 class UrlPage extends StatefulWidget {
@@ -13,41 +14,38 @@ class UrlPage extends StatefulWidget {
 }
 
 class _UrlPageState extends State<UrlPage> {
-
+  final ShoppyAdminAgentImpl shoppyAdminAgent = ShoppyAdminAgentImpl();
   final _urlController = TextEditingController();
   final RegExp emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
   String? _nameErrorMessage;
 
-  final FocusNode _userNameFocusNode = FocusNode();
-  final FocusNode _passwordFocusNode = FocusNode();
+  @override
+  void initState() {
+    super.initState();
+  }
 
-  Future<void> _onClickLogin() async{
+  Future<void> _saveUrl() async {
     if(_urlController.text.isEmpty){
-      setState(() {
-        _nameErrorMessage = 'Username is require';
-      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter Url!")),
+      );
       return;
-    }else{
-      setState(() {
-        _nameErrorMessage = null;
-      });
     }
-    final bloc = Provider.of<AuthProvider>(context, listen: false);
 
-    //bool success = await bloc.loginWithEmail(_userNameController.text, _passwordController.text);
-    // if (!mounted) return; // Prevent navigation if widget is disposed
-    // if (success) {
-    //   Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePage()));
-    // } else {
-    //   showToastMessage(context, 'Something went wrong');
-    // }
+    final authModel = Provider.of<AuthProvider>(context,listen: false);
+    authModel.saveUrl(_urlController.text);
+    showSuccessToast(context, 'Url saved Successfully');
+
+    // Update the baseUrl in ShoppyAdminAgentImpl
+    shoppyAdminAgent.updateBaseUrl(_urlController.text);
+
+    // Navigate to the login screen
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage()));
   }
 
   @override
   void dispose() {
     _urlController.dispose();
-    _userNameFocusNode.dispose();
-    _passwordFocusNode.dispose();
     super.dispose();
   }
 
@@ -68,13 +66,13 @@ class _UrlPageState extends State<UrlPage> {
               Image.asset(
                 'assets/pana.png',
                 width: MediaQuery.of(context).size.width * 0.8,
-                height: MediaQuery.of(context).size.height * 0.36,
+                height: MediaQuery.of(context).size.height * 0.34,
               ),
-              const SizedBox(height: 60),
+              const SizedBox(height: 40),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Text(
-                  'Login',
+                  'Url',
                   style: TextStyle(color: AppColors.colorPrimary,fontFamily: 'Ubuntu',fontWeight: FontWeight.w600),
                 ),
               ),
@@ -83,7 +81,7 @@ class _UrlPageState extends State<UrlPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Container(
                   height: 2,
-                  width: 43,
+                  width: 30,
                   color: AppColors.colorPrimary,
                 ),
               ),
@@ -93,10 +91,10 @@ class _UrlPageState extends State<UrlPage> {
                 padding: const EdgeInsets.all(8),
                 child: TextField(
                   controller: _urlController,
-                  focusNode: _userNameFocusNode,
                   decoration: InputDecoration(
-                    hintText: 'username',
+                    hintText: 'Please enter url',
                     errorText: _nameErrorMessage,
+                    errorStyle: const TextStyle(color: Colors.black45),
                     hintStyle: const TextStyle(color:Colors.black38,fontFamily: 'Ubuntu',fontSize: 14),
                     enabledBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: AppColors.colorPrimary50), // Color when not focused
@@ -105,11 +103,7 @@ class _UrlPageState extends State<UrlPage> {
                       borderSide: BorderSide(color: AppColors.colorPrimary), // Color when focused
                     ),
                   ),
-                  onSubmitted: (_) {
-                    // Move focus to the password field
-                    FocusScope.of(context).requestFocus(_passwordFocusNode);
-                  },
-                  keyboardType: TextInputType.emailAddress,
+                  keyboardType: TextInputType.url,
                 ),
               ),
               const SizedBox(height: 50),
@@ -125,17 +119,8 @@ class _UrlPageState extends State<UrlPage> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: TextButton(
-                        onPressed: model.isLoading ? null : _onClickLogin, // Disable button when loading
-                        child: model.isLoading
-                            ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                            : const Text(
+                        onPressed: _saveUrl, // Disable button when loading
+                        child: const Text(
                           'Add Url',
                           style: TextStyle(color: Colors.white),
                         ),

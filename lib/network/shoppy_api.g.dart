@@ -13,9 +13,7 @@ class _ShoppyApi implements ShoppyApi {
     this._dio, {
     this.baseUrl,
     this.errorLogger,
-  }) {
-    baseUrl ??= 'http://192.168.99.17:8000';
-  }
+  });
 
   final Dio _dio;
 
@@ -26,6 +24,7 @@ class _ShoppyApi implements ShoppyApi {
   @override
   Future<PostMethodResponse?> addColor(
     String apiKey,
+    String url,
     ColorRequestVo requestBody,
   ) async {
     final _extra = <String, dynamic>{};
@@ -41,7 +40,7 @@ class _ShoppyApi implements ShoppyApi {
     )
         .compose(
           _dio.options,
-          '/api/colors',
+          '${url}/api/brands',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -713,6 +712,41 @@ class _ShoppyApi implements ShoppyApi {
       _value = _result.data == null
           ? null
           : PostMethodResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<SliderResponse?> getSliders(String apiKey) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{r'Authorization': apiKey};
+    _headers.removeWhere((k, v) => v == null);
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<SliderResponse>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+        .compose(
+          _dio.options,
+          '/api/sliders',
+          queryParameters: queryParameters,
+          data: _data,
+        )
+        .copyWith(
+            baseUrl: _combineBaseUrls(
+          _dio.options.baseUrl,
+          baseUrl,
+        )));
+    final _result = await _dio.fetch<Map<String, dynamic>?>(_options);
+    late SliderResponse? _value;
+    try {
+      _value =
+          _result.data == null ? null : SliderResponse.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options);
       rethrow;

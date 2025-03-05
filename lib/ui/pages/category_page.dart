@@ -36,8 +36,7 @@ class _CategoryPageState extends State<CategoryPage> {
 
   Future<void> _initializeData() async{
     final authModel = Provider.of<AuthProvider>(context,listen: false);
-    _token = authModel.accessToken;
-    _refreshToken = authModel.refreshToken;
+
   }
 
   Future<void> _deleteBrand(int index) async{

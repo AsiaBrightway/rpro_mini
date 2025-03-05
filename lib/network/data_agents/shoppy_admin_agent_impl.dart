@@ -13,24 +13,28 @@ import 'package:rpro_mini/network/responses/login_response.dart';
 import 'package:rpro_mini/network/responses/post_method_response.dart';
 import 'package:rpro_mini/network/responses/product_response.dart';
 import 'package:rpro_mini/network/responses/size_response.dart';
+import 'package:rpro_mini/network/responses/slider_response.dart';
 import 'package:rpro_mini/network/responses/sub_category_response.dart';
 import 'package:rpro_mini/network/shoppy_api.dart';
 import '../../data/vos/error_vo.dart';
 import '../../exception/custom_exception.dart';
 
 class ShoppyAdminAgentImpl extends ShoppyAdminAgent{
-
+  late Dio dio;
   late ShoppyApi shoppyApi;
 
   static ShoppyAdminAgentImpl? _singleton;
 
-  factory ShoppyAdminAgentImpl(){
-    _singleton ??= ShoppyAdminAgentImpl._internal();
+  factory ShoppyAdminAgentImpl({String? baseUrl}){
+    _singleton ??= ShoppyAdminAgentImpl._internal(baseUrl: baseUrl);
     return _singleton!;
   }
 
-  ShoppyAdminAgentImpl._internal(){
-    final dio = Dio();
+  ShoppyAdminAgentImpl._internal({String? baseUrl}) {
+    dio = Dio();
+    if (baseUrl != null) {
+      dio.options.baseUrl = baseUrl; // Set the baseUrl in Dio
+    }
     shoppyApi = ShoppyApi(dio);
   }
 
@@ -39,6 +43,10 @@ class ShoppyAdminAgentImpl extends ShoppyAdminAgent{
       file.path,
       filename: file.path.split('/').last, // Optional: Set the file name
     );
+  }
+
+  void updateBaseUrl(String baseUrl) {
+    dio.options.baseUrl = baseUrl;
   }
 
   CustomException _createException(dynamic error){
@@ -86,12 +94,6 @@ class ShoppyAdminAgentImpl extends ShoppyAdminAgent{
     }
   }
 
-  @override
-  Future<PostMethodResponse?> addColor(String token,ColorRequestVo request) {
-    return shoppyApi.addColor(token, request).catchError((onError){
-      throw _createException(onError);
-    });
-  }
 
   @override
   Future<ColorResponse?> getColors(String token,) {
@@ -309,6 +311,13 @@ class ShoppyAdminAgentImpl extends ShoppyAdminAgent{
   @override
   Future<PostMethodResponse?> updateProductById(String token, int id, ProductRequestVo body) {
     return shoppyApi.updateProductById(token, id, body).catchError((onError){
+      throw _createException(onError);
+    });
+  }
+
+  @override
+  Future<SliderResponse?> getSliders(String token) {
+    return shoppyApi.getSliders(token).catchError((onError){
       throw _createException(onError);
     });
   }

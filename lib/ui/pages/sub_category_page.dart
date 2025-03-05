@@ -40,8 +40,7 @@ class _SubCategoryPageState extends State<SubCategoryPage> {
 
   Future<void> _initializeData() async{
     final authModel = Provider.of<AuthProvider>(context,listen: false);
-    _token = authModel.accessToken;
-    _refreshToken = authModel.refreshToken;
+
   }
 
   Future<void> _deleteSubCategory(int index) async{
