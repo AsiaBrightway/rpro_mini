@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
 import 'package:provider/provider.dart' as provider;
+import 'package:rpro_mini/bloc/home_bloc.dart';
+import 'package:rpro_mini/ui/pages/home_page.dart';
+import 'package:rpro_mini/ui/pages/login_page.dart';
+import 'package:rpro_mini/ui/pages/printer_config_page.dart';
+import 'package:rpro_mini/ui/pages/setting_page.dart';
 import 'package:rpro_mini/ui/pages/splash_page.dart';
+import 'package:rpro_mini/ui/pages/url_page.dart';
 import 'package:rpro_mini/ui/themes/dark_mode.dart';
 import 'package:rpro_mini/ui/themes/light_mode.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,6 +27,7 @@ void main() async{
         providers: [
           provider.ChangeNotifierProvider(create: (context) => PrinterService()),
           provider.ChangeNotifierProvider(create: (context) => AuthProvider()),
+          provider.ChangeNotifierProvider(create: (context) => HomeBloc())
         ],
         child: MyApp(shoppyAdminAgent: shoppyAdminAgent),
       ),
@@ -42,6 +49,9 @@ class MyApp extends StatelessWidget {
       theme: lightMode,
       darkTheme: darkMode,
       home: const SplashPage(),
+        routes: {
+          '/login': (context) => LoginPage(),
+        }
     );
   }
 }

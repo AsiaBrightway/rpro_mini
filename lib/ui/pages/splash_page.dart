@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:rpro_mini/bloc/home_bloc.dart';
 import 'package:rpro_mini/ui/pages/home_page.dart';
 import 'package:rpro_mini/ui/pages/login_page.dart';
 import 'package:rpro_mini/ui/pages/url_page.dart';
@@ -26,6 +27,8 @@ class _SplashPageState extends State<SplashPage> {
   }
 
   Future<void> _checkLoginStatus() async{
+    HomeBloc homeBloc = Provider.of<HomeBloc>(context,listen: false);
+    var floors = homeBloc.floors;
     AuthProvider authProvider = Provider.of<AuthProvider>(context,listen: false);
     await Future.delayed(const Duration(seconds: 2));
     await Provider.of<AuthProvider>(context,listen: false).loadToken();
@@ -39,10 +42,10 @@ class _SplashPageState extends State<SplashPage> {
     ///we will use network and check name and password
     else if(name.isNotEmpty){
       if(!mounted) return;
-      Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePage()));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage(floors: floors,)));
     }else{
       if(!mounted) return;
-      Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage()));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginPage()));
     }
   }
 

@@ -1,28 +1,63 @@
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rpro_mini/bloc/add_item_bloc.dart';
-import 'package:rpro_mini/ui/themes/colors.dart';// Your AuthProvider class
+import 'package:rpro_mini/bloc/auth_provider.dart';
+import 'package:rpro_mini/ui/components/flying_animation.dart';
+import 'package:rpro_mini/ui/pages/cart_page.dart';
+import 'package:rpro_mini/ui/themes/colors.dart';
 
 class AddOrderPage extends StatefulWidget {
+  const AddOrderPage({super.key});
 
   @override
   State<AddOrderPage> createState() => _AddOrderPageState();
 }
 
 class _AddOrderPageState extends State<AddOrderPage> {
+  final GlobalKey cartKey = GlobalKey();
+  List<GlobalKey> _itemKeys = [];
+
   void _onBackPressed() {
     Navigator.of(context).pop();
+  }
+
+  void _animateToCart(BuildContext context, GlobalKey itemKey) {
+    final OverlayState overlayState = Overlay.of(context);
+    final RenderBox itemBox = itemKey.currentContext!.findRenderObject() as RenderBox;
+    final RenderBox cartBox = cartKey.currentContext!.findRenderObject() as RenderBox;
+
+    final Offset itemPosition = itemBox.localToGlobal(Offset.zero);
+    final Offset cartPosition = cartBox.localToGlobal(Offset.zero);
+
+    late OverlayEntry overlayEntry;
+
+    // Create an OverlayEntry
+    overlayEntry = OverlayEntry(
+      builder: (context) {
+        return FlyingItemAnimation(
+          image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLRS75kXFbSnhLpwOzucGTZnBsr7XZxAZ-OQ&s',
+          startPosition: itemPosition,
+          endPosition: cartPosition,
+          onComplete: () {
+            overlayEntry.remove(); // Remove animation when done
+          },
+        );
+      },
+    );
+
+    overlayState.insert(overlayEntry);
   }
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => AddItemBloc() ,
+      create: (context) => AddItemBloc(),
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          title: const Text("Food Items",style: TextStyle(color: Colors.white),),
+          title: const Text("Food Items",style: TextStyle(color: Colors.white)),
           centerTitle: true,
           backgroundColor: AppColors.colorPrimary,
           leading: IconButton(
@@ -31,8 +66,9 @@ class _AddOrderPageState extends State<AddOrderPage> {
           ),
           actions: [
             IconButton(
+                key: cartKey,
                 onPressed: (){
-
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const CartPage()));
                 },
                 icon: const Icon(Icons.shopping_cart,color: Colors.white,))
           ],
@@ -85,92 +121,162 @@ class _AddOrderPageState extends State<AddOrderPage> {
                 ),
               ),
               Row(
-                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text('Choose Items',style: TextStyle(color: AppColors.colorPrimary,fontFamily: 'Ubuntu',fontWeight: FontWeight.w600,fontSize: 16),),
                   ),
+                  Selector<AuthProvider,String>(
+                    selector: (context,authBloc) => authBloc.layout,
+                    builder: (context,layout,_){
+                      return IconButton(
+                        icon: Icon(layout == 'list'
+                            ? Icons.list
+                            : Icons.grid_view,color: Colors.black38,),
+                        onPressed: () {
+                          var bloc = context.read<AuthProvider>();
+                          bloc.toggleLayout();
+                        },
+                      );
+                    },
+                  ),
                 ],
               ),
               // 🔹 Grid View
-              Expanded(
-                child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 1,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                  ),
-                  itemCount: 16,
-                  itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onTap: (){
-
+              Selector<AuthProvider,String>(
+                selector: (context,bloc)=> bloc.layout,
+                  builder: (context,layout,_){
+                  return Selector<AddItemBloc,List<String>>(
+                      selector: (context,itemBloc) => itemBloc.items,
+                      builder: (context,itemList,_){
+                        _itemKeys = List.generate(itemList.length, (index) => GlobalKey());
+                        if(layout == 'grid'){
+                          return Expanded(
+                            child: GridView.builder(
+                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                childAspectRatio: 1,
+                                crossAxisSpacing: 10,
+                                mainAxisSpacing: 10,
+                              ),
+                              itemCount: itemList.length,
+                              itemBuilder: (context, index) {
+                                return Expanded(
+                                  child: GestureDetector(
+                                    key: _itemKeys[index],
+                                    onTap: (){
+                                      _animateToCart(context, _itemKeys[index]);
+                                      //Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingPage()));
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        border: Border.all(color: Colors.black38,width: 0.6),
+                                        borderRadius: BorderRadius.circular(10),
+                                        color: Colors.white,
+                                      ),
+                                      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          // 🖼 CachedNetworkImage Implementation
+                                          ClipRRect(
+                                            borderRadius: const BorderRadius.only(
+                                              topLeft: Radius.circular(10),
+                                              topRight: Radius.circular(10),
+                                            ),
+                                            child: CachedNetworkImage(
+                                              imageUrl: 'http://rproplus.asiabrightway.com/storage/Images/6731845646151_tiger.jpg',
+                                              height: 110, // Fixed height for better layout control
+                                              width: double.infinity, // Take up the full width of the container
+                                              fit: BoxFit.cover, // Fill the space while maintaining aspect ratio
+                                              placeholder: (context, url) => const Center(child: CircularProgressIndicator()), // Placeholder
+                                              errorWidget: (context, url, error) => const Icon(Icons.error, color: Colors.red), // Error handling
+                                            ),
+                                          ),
+                                          // 📌 Title
+                                          const Padding(
+                                            padding: EdgeInsets.only(left: 8.0,top: 4),
+                                            child: Text(
+                                              'Carlsberg',
+                                              style: TextStyle(fontSize: 14),
+                                              textAlign: TextAlign.center, // Center title
+                                            ),
+                                          ),
+                                          const Padding(
+                                            padding: EdgeInsets.only(left: 8.0),
+                                            child: Text(
+                                              '2400 MMK',
+                                              style: TextStyle(fontSize: 15,fontWeight: FontWeight.w700),
+                                              textAlign: TextAlign.center, // Center title
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.only(left: 8.0),
+                                            child: Text(
+                                              'Store Qty: 23',
+                                              style: TextStyle(
+                                                  fontFamily:'Ubuntu',fontSize: 14,fontWeight: FontWeight.w400,color: AppColors.stockQtyColor),
+                                              textAlign: TextAlign.center, // Center title
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        }
+                        else{
+                          return Expanded(
+                            child: SizedBox(
+                                child: _buildListView(itemList)
+                            ),
+                          );
+                        }
                       },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black38,width: 0.6),
-                          borderRadius: BorderRadius.circular(10), // Rounded corners for the whole container
-                          color: Colors.white, // Background color for items
-                        ),
-                        margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // 🖼 CachedNetworkImage Implementation
-                            ClipRRect(
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(10),
-                                topRight: Radius.circular(10),
-                              ),
-                              child: CachedNetworkImage(
-                                imageUrl: 'http://rproplus.asiabrightway.com/storage/Images/6731845646151_tiger.jpg',
-                                height: 110, // Fixed height for better layout control
-                                width: double.infinity, // Take up the full width of the container
-                                fit: BoxFit.cover, // Fill the space while maintaining aspect ratio
-                                placeholder: (context, url) => const Center(child: CircularProgressIndicator()), // Placeholder
-                                errorWidget: (context, url, error) => const Icon(Icons.error, color: Colors.red), // Error handling
-                              ),
-                            ),
-                            // 📌 Title
-                            const Padding(
-                              padding: EdgeInsets.only(left: 8.0,top: 4),
-                              child: Text(
-                                'Carlsberg',
-                                style: TextStyle(fontSize: 14),
-                                textAlign: TextAlign.center, // Center title
-                              ),
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.only(left: 8.0),
-                              child: Text(
-                                '2400 MMK',
-                                style: TextStyle(fontSize: 15,fontWeight: FontWeight.w700),
-                                textAlign: TextAlign.center, // Center title
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 8.0),
-                              child: Text(
-                                'Store Qty: 23',
-                                style: TextStyle(
-                                    fontFamily:'Ubuntu',fontSize: 14,fontWeight: FontWeight.w400,color: AppColors.stockQtyColor),
-                                textAlign: TextAlign.center, // Center title
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
+                  );
 
+                  },
+              )
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildListView(List<String> itemList) {
+    return ListView.builder(
+      itemCount: itemList.length,
+      itemBuilder: (context, index) {
+        return Card(
+          key: _itemKeys[index],
+          child: ListTile(
+            leading: ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: CachedNetworkImage(
+                width: 40,
+                height: 40,
+                imageUrl: 'http://rproplus.asiabrightway.com/storage/Images/6731845646151_tiger.jpg',
+                fit: BoxFit.cover, // Fill the space while maintaining aspect ratio
+                placeholder: (context, url) => const Center(child: CircularProgressIndicator()), // Placeholder
+                errorWidget: (context, url, error) => const Icon(Icons.error, color: Colors.red), // Error handling
+              ),
+            ),
+            title: const Text('Carlsberg'),
+            subtitle: Text('2400 MMK',style: TextStyle(color: AppColors.colorPrimary,fontSize: 16),),
+            trailing: TextButton(
+              onPressed: () {
+                // Handle Add Button
+              },
+              child: const Text("Add"),
+            ),
+          ),
+        );
+      },
     );
   }
 }

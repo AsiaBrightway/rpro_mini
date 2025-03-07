@@ -44,7 +44,7 @@ class _LoginPageState extends State<LoginPage> {
     else {
       final authModel = Provider.of<AuthProvider>(context,listen: false);
       authModel.saveTokenToDatabase(_userNameController.text, _passwordController.text);
-      Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePage()));
+      Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePage(floors: [],)));
       setState(() {
         _passwordErrorMessage = null;
         _nameErrorMessage = null;
