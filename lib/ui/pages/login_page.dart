@@ -1,7 +1,8 @@
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:rpro_mini/ui/pages/home_page.dart';
+import 'package:rpro_mini/ui/pages/splash_page.dart';
 import '../../bloc/auth_provider.dart';
 import '../themes/colors.dart';
 
@@ -20,7 +21,7 @@ class _LoginPageState extends State<LoginPage> {
   String? _nameErrorMessage;
   String userName = '';
   String? _passwordErrorMessage;
-
+  bool isLoading = false;
   final FocusNode _userNameFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
 
@@ -30,13 +31,18 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _onClickLogin() async {
+    setState(() {
+      isLoading = true;
+    });
     if (_userNameController.text.isEmpty) {
       setState(() {
+        isLoading = false;
         _nameErrorMessage = 'Username is require';
       });
       return;
     } else if (_passwordController.text.isEmpty) {
       setState(() {
+        isLoading = false;
         _nameErrorMessage = null;
         _passwordErrorMessage = 'Password is require';
       });
@@ -44,7 +50,7 @@ class _LoginPageState extends State<LoginPage> {
     else {
       final authModel = Provider.of<AuthProvider>(context,listen: false);
       authModel.saveTokenToDatabase(_userNameController.text, _passwordController.text);
-      Navigator.push(context, MaterialPageRoute(builder: (context) => const HomePage(floors: [],)));
+      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const SplashPage()),(routes) => false);
       setState(() {
         _passwordErrorMessage = null;
         _nameErrorMessage = null;
@@ -61,113 +67,113 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-    @override
-    Widget build(BuildContext context) {
-      return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          toolbarHeight: 10,
-        ),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
         backgroundColor: Colors.white,
-        body: SingleChildScrollView(
-          child: Container(
-            margin: EdgeInsets.symmetric(horizontal: MediaQuery
-                .of(context)
-                .size
-                .width * 0.1),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Image.asset(
-                  'assets/pana.png',
-                  width: MediaQuery
-                      .of(context)
-                      .size
-                      .width * 0.8,
-                  height: MediaQuery
-                      .of(context)
-                      .size
-                      .height * 0.36,
+        toolbarHeight: 10,
+      ),
+      backgroundColor: Colors.white,
+      body: SingleChildScrollView(
+        child: Container(
+          margin: EdgeInsets.symmetric(horizontal: MediaQuery
+              .of(context)
+              .size
+              .width * 0.1),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Image.asset(
+                'assets/pana.png',
+                width: MediaQuery
+                    .of(context)
+                    .size
+                    .width * 0.8,
+                height: MediaQuery
+                    .of(context)
+                    .size
+                    .height * 0.36,
+              ),
+              const SizedBox(height: 60),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Text(
+                  'Login',
+                  style: TextStyle(color: AppColors.colorPrimary,
+                      fontFamily: 'Ubuntu',
+                      fontWeight: FontWeight.w600),
                 ),
-                const SizedBox(height: 60),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Text(
-                    'Login',
-                    style: TextStyle(color: AppColors.colorPrimary,
+              ),
+
+              ///horizontal small line
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Container(
+                  height: 2,
+                  width: 43,
+                  color: AppColors.colorPrimary,
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              ///email edit text
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: TextField(
+                  controller: _userNameController,
+                  focusNode: _userNameFocusNode,
+                  decoration: InputDecoration(
+                    hintText: 'username',
+                    errorText: _nameErrorMessage,
+                    hintStyle: const TextStyle(color: Colors.black38,
                         fontFamily: 'Ubuntu',
-                        fontWeight: FontWeight.w600),
-                  ),
-                ),
-
-                ///horizontal small line
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Container(
-                    height: 2,
-                    width: 43,
-                    color: AppColors.colorPrimary,
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                ///email edit text
-                Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: TextField(
-                    controller: _userNameController,
-                    focusNode: _userNameFocusNode,
-                    decoration: InputDecoration(
-                      hintText: 'username',
-                      errorText: _nameErrorMessage,
-                      hintStyle: const TextStyle(color: Colors.black38,
-                          fontFamily: 'Ubuntu',
-                          fontSize: 14),
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: AppColors
-                            .colorPrimary50), // Color when not focused
-                      ),
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: AppColors
-                            .colorPrimary), // Color when focused
-                      ),
+                        fontSize: 14),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: AppColors
+                          .colorPrimary50), // Color when not focused
                     ),
-                    onSubmitted: (_) {
-                      // Move focus to the password field
-                      FocusScope.of(context).requestFocus(_passwordFocusNode);
-                    },
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                ),
-
-                ///password edit text
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: TextField(
-                    controller: _passwordController,
-                    focusNode: _passwordFocusNode,
-                    decoration: InputDecoration(
-                      hintText: 'password',
-                      errorText: _passwordErrorMessage,
-                      hintStyle: const TextStyle(fontFamily: 'Ubuntu',
-                          fontSize: 14,
-                          color: Colors.black38),
-                      enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: AppColors
-                            .colorPrimary50), // Color when not focused
-                      ),
-                      focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: AppColors
-                            .colorPrimary), // Color when focused
-                      ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: AppColors
+                          .colorPrimary), // Color when focused
                     ),
-                    keyboardType: TextInputType.emailAddress,
                   ),
+                  onSubmitted: (_) {
+                    // Move focus to the password field
+                    FocusScope.of(context).requestFocus(_passwordFocusNode);
+                  },
+                  keyboardType: TextInputType.emailAddress,
                 ),
-                const SizedBox(height: 50),
+              ),
 
-                ///login button
-                Padding(
+              ///password edit text
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: TextField(
+                  controller: _passwordController,
+                  focusNode: _passwordFocusNode,
+                  decoration: InputDecoration(
+                    hintText: 'password',
+                    errorText: _passwordErrorMessage,
+                    hintStyle: const TextStyle(fontFamily: 'Ubuntu',
+                        fontSize: 14,
+                        color: Colors.black38),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: AppColors
+                          .colorPrimary50), // Color when not focused
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: AppColors
+                          .colorPrimary), // Color when focused
+                    ),
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                ),
+              ),
+              const SizedBox(height: 50),
+
+              ///login button
+              Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Container(
                     width: MediaQuery
@@ -179,18 +185,19 @@ class _LoginPageState extends State<LoginPage> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: TextButton(
-                      onPressed: _onClickLogin,
-                      child: const Text(
-                        'Login',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+                        onPressed: _onClickLogin,
+                        child: isLoading
+                            ? const CupertinoActivityIndicator(color: Colors.white)
+                            : const Text(
+                          'Login',
+                          style: TextStyle(color: Colors.white),
+                        )),
+                  )
+              ),
+            ],
           ),
         ),
-      );
-    }
+      ),
+    );
+  }
 }

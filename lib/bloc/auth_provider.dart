@@ -8,7 +8,6 @@ class AuthProvider extends ChangeNotifier{
   String _url = '';
   String _layout = 'grid';
 
-
   String get layout => _layout;
   String get url => _url;
   String get password => _password;

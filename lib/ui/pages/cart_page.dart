@@ -24,7 +24,7 @@ class _CartPageState extends State<CartPage> {
         centerTitle: true,
         leading: IconButton(
           onPressed: _onBackPressed,
-          icon: Icon(Icons.arrow_back_ios,color: Colors.white,),
+          icon: const Icon(Icons.arrow_back_ios,color: Colors.white,),
         ),
         title: const Text('Table( T003 )',style: TextStyle(color: Colors.white,fontFamily: 'Ubuntu',letterSpacing: 0.8),),
       ),

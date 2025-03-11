@@ -79,53 +79,80 @@ class _AddOrderPageState extends State<AddOrderPage> {
             children: [
               const SizedBox(height: 8),
               // 🔹 Horizontal List
-              Container(
-                height: 100,
-                margin: const EdgeInsets.symmetric(vertical: 6),
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.only(left: 4),
-                  itemCount: 8,
-                  itemBuilder: (context, index) {
-                    return Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black38),
-                        borderRadius: BorderRadius.circular(17)
-                      ),
-                      margin: const EdgeInsets.only(right: 6),
-                      child: Column(
-                        children: [
-                          // 🖼 CachedNetworkImage
-                          SizedBox(
-                            height: 65,  // Specify height for the image
-                            width: 90,  // Specify width for the image
-                            child: ClipRRect(
-                              borderRadius: const BorderRadius.only(topRight: Radius.circular(16),topLeft: Radius.circular(16)),
-                              child: CachedNetworkImage(
-                                imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSk1XUzPI3MBwANtXUkr3RohaUIg4f0sWET9g&s',
-                                fit: BoxFit.cover,
-                                placeholder: (context, url) => const Center(child: CircularProgressIndicator()), // Loading
-                                errorWidget: (context, url, error) => const Icon(Icons.error, color: Colors.red), // Error
+              Selector<AddItemBloc,List<String>>(
+                selector: (context,bloc) => bloc.categories,
+                builder: (context,categories,_){
+                  var bloc = context.read<AddItemBloc>();
+                  return Container(
+                    height: 100,
+                    alignment: Alignment.bottomCenter,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.only(left: 4),
+                      itemCount: categories.length,
+                      itemBuilder: (context, index) {
+                        return InkWell(
+                          onTap: (){
+                            bloc.onTapCategory(1);
+                          },
+                          child: Stack(
+                            alignment: Alignment.bottomCenter, // Ensures text stays at the bottom
+                            children: [
+                              // Image Container
+                              Container(
+                                margin: const EdgeInsets.all(6),
+                                height: 100,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: CachedNetworkImage(
+                                    imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSk1XUzPI3MBwANtXUkr3RohaUIg4f0sWET9g&s',
+                                    fit: BoxFit.cover,
+                                    placeholder: (context, url) => const Center(child: CircularProgressIndicator()), // Loading
+                                    errorWidget: (context, url, error) => const Icon(Icons.error, color: Colors.red), // Error
+                                  ),
+                                ),
                               ),
-                            ),
+                              /// Gradient Effect for Better Text Visibility
+                              Positioned(
+                                bottom: 0, // Positions at the bottom
+                                left: 0,
+                                right: 0,
+                                child: Container(
+                                  margin: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    borderRadius: const BorderRadius.only(
+                                      bottomLeft: Radius.circular(16),
+                                      bottomRight: Radius.circular(16),
+                                    ),
+                                    color: Colors.black.withOpacity(0.5),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(vertical: 4),
+                                  child: Text(
+                                    categories[index],
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.white, // White text for contrast
+                                      fontWeight: FontWeight.w500,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          // 📌 Title
-                          const Padding(
-                            padding: EdgeInsets.only(top: 2),
-                            child: Text('Beer', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
+                        );
+                      },
+                    ),
+                  );
+                },
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Text('Choose Items',style: TextStyle(color: AppColors.colorPrimary,fontFamily: 'Ubuntu',fontWeight: FontWeight.w600,fontSize: 16),),
+                    child: Text('Choose Items',style: TextStyle(color: AppColors.colorPrimary,fontFamily: 'Ubuntu',fontWeight: FontWeight.w600,fontSize: 16)),
                   ),
                   Selector<AuthProvider,String>(
                     selector: (context,authBloc) => authBloc.layout,
@@ -133,7 +160,7 @@ class _AddOrderPageState extends State<AddOrderPage> {
                       return IconButton(
                         icon: Icon(layout == 'list'
                             ? Icons.list
-                            : Icons.grid_view,color: Colors.black38,),
+                            : Icons.grid_view,color: Colors.black38),
                         onPressed: () {
                           var bloc = context.read<AuthProvider>();
                           bloc.toggleLayout();
@@ -163,7 +190,7 @@ class _AddOrderPageState extends State<AddOrderPage> {
                               itemCount: itemList.length,
                               itemBuilder: (context, index) {
                                 return Expanded(
-                                  child: GestureDetector(
+                                  child: InkWell(
                                     key: _itemKeys[index],
                                     onTap: (){
                                       _animateToCart(context, _itemKeys[index]);
@@ -173,7 +200,6 @@ class _AddOrderPageState extends State<AddOrderPage> {
                                       decoration: BoxDecoration(
                                         border: Border.all(color: Colors.black38,width: 0.6),
                                         borderRadius: BorderRadius.circular(10),
-                                        color: Colors.white,
                                       ),
                                       margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
                                       child: Column(
@@ -270,7 +296,7 @@ class _AddOrderPageState extends State<AddOrderPage> {
             subtitle: Text('2400 MMK',style: TextStyle(color: AppColors.colorPrimary,fontSize: 16),),
             trailing: TextButton(
               onPressed: () {
-                // Handle Add Button
+                _animateToCart(context, _itemKeys[index]);
               },
               child: const Text("Add"),
             ),

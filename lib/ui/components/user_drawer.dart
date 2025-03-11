@@ -36,6 +36,13 @@ class _UserDrawerState extends State<UserDrawer> {
     );
   }
 
+  void _navigateToConfigPage(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const PrinterConfigPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -44,15 +51,15 @@ class _UserDrawerState extends State<UserDrawer> {
           children: [
             Center(
               child: DrawerHeader(
-                  child: Image.asset('assets/rpro_logo.png',width: 100,)),
+                  child: Image.asset('assets/rpro_logo.webp',width: 100,)),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: ListTile(
-                leading: const Icon(Icons.print,color: Colors.black87,),
+                leading: const Icon(Icons.print,color: Colors.black87),
                 title: const Text('Printer Config',style: TextStyle(fontWeight: FontWeight.w500),),
                 onTap: (){
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => PrinterConfigPage()));
+                  _navigateToConfigPage(context);
                 },
               ),
             ),

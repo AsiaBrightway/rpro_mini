@@ -53,16 +53,51 @@ class _SplashPageState extends State<SplashPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.colorPrimary,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset('assets/rpro_logo.png',width: 160,height: 160),
-            const SizedBox(height: 20),
-            const CupertinoActivityIndicator(color: Colors.white,radius: 12,)
-          ],
-        )
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset('assets/rpro_logo.webp',width: 160,height: 160),
+                const SizedBox(height: 20),
+                const CupertinoActivityIndicator(color: Colors.white,radius: 12),
+              ],
+            ),
+          ),
+          Container(
+            color: AppColors.cartBgColor,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: RichText(
+                    textAlign: TextAlign.center,
+                    text: const TextSpan(
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: 'Ubuntu',
+                        color: Colors.grey, // Default color for "Developed by"
+                      ),
+                      children: [
+                        TextSpan(text: 'Developed by '),
+                        TextSpan(
+                          text: 'Asia Bright Way',
+                          style: TextStyle(color: Colors.white), // Blue color for Asia Bright Way
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
+
     );
   }
 }

@@ -4,7 +4,6 @@ import 'package:rpro_mini/bloc/home_bloc.dart';
 import 'package:rpro_mini/data/vos/table_vo.dart';
 import 'package:rpro_mini/ui/components/user_drawer.dart';
 import 'package:rpro_mini/ui/pages/add_order_page.dart';
-import 'package:rpro_mini/ui/pages/printer_config_page.dart';
 import 'package:rpro_mini/ui/themes/colors.dart';
 import '../../bloc/auth_provider.dart';
 
@@ -19,15 +18,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin{
   TabController? _tabController;
 
-  final List<TableVo> tables = [
-    TableVo(1,"T003"),
-    TableVo(2,"T001"),
-    TableVo(3,"T005"),
-    TableVo(4,"T007"),
-    TableVo(5,"Table 5"),
-    TableVo(6,"Table 6"),
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -35,17 +25,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     _initializeData();
   }
 
-
   Future<void> _initializeData() async{
     final authModel = Provider.of<AuthProvider>(context,listen: false);
     authModel.loadToken();
-  }
-
-  void _navigateToConfigPage(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const PrinterConfigPage()),
-    );
   }
 
   @override
@@ -61,12 +43,16 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           ),
           backgroundColor: AppColors.colorPrimary,
           centerTitle: true,
-            bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(48.0),
-              child: Selector<HomeBloc, List<String>>(
-                selector: (context, bloc) => bloc.floors,
-                builder: (context, floors, _) {
-                  return Container(
+
+        ),
+        drawer: const UserDrawer(),
+        body: Selector<HomeBloc,List<String>>(
+          selector: (context,bloc) => bloc.floors,
+          builder: (context,floors,_){
+            if(floors.isNotEmpty){
+              return Column(
+                children: [
+                  Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
                       boxShadow: [
@@ -96,11 +82,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                         borderRadius: BorderRadius.circular(8), // Rounded corners
                       ),
                       indicatorPadding: const EdgeInsets.symmetric(vertical: 13), // Padding around the box
-                      labelPadding: const EdgeInsets.only(left: 4,top: 8,bottom: 8), // Padding inside the tab
+                      labelPadding: const EdgeInsets.only(right: 16,top: 8,bottom: 8), // Padding inside the tab
                       tabs: floors.map((floor) {
                         return Tab(
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6), // Inner padding for text
+                            margin: const EdgeInsets.only(right: 8,left: 8),
+                            padding: const EdgeInsets.symmetric(vertical: 6), // Inner padding for text
                             decoration: BoxDecoration(
                               // Unselected tab decoration (optional)
                               borderRadius: BorderRadius.circular(8),
@@ -109,43 +96,46 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                               floor.toString(),
                               style: const TextStyle(
                                 fontSize: 14,
-                                letterSpacing: 0.8,
                               ),
                             ),
                           ),
                         );
                       }).toList(),
                     ),
-                  );
-                },
-              ),
-            ),
-        ),
-        drawer: const UserDrawer(),
-        body: Selector<HomeBloc,List<String>>(
-          selector: (context,bloc) => bloc.floors,
-          builder: (context,floors,_){
-            if(floors.isNotEmpty){
-              return TabBarView(
-                controller: _tabController,
-                children: floors.map((floor) {
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: GridView.builder(
-                      padding: const EdgeInsets.only(top: 30),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 4,
-                        crossAxisSpacing: 8,
-                        mainAxisSpacing: 8,
-                        childAspectRatio: 1.1,
-                      ),
-                      itemCount: tables.length,
-                      itemBuilder: (context, index) {
-                        return TableCard(table: tables[index]);
-                      },
-                    ),
-                  );
-                }).toList(),
+                  ),
+                  Expanded(
+                      child: Selector<HomeBloc,List<TableVo>>(
+                        selector: (context,bloc) => bloc.tables,
+                        builder: (context,tables,_){
+                          if(tables.isNotEmpty){
+                            return TabBarView(
+                              controller: _tabController,
+                              children: floors.map((floor) {
+                                return Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: GridView.builder(
+                                    padding: const EdgeInsets.only(top: 30),
+                                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 4,
+                                      crossAxisSpacing: 8,
+                                      mainAxisSpacing: 8,
+                                      childAspectRatio: 1.1,
+                                    ),
+                                    itemCount: tables.length,
+                                    itemBuilder: (context, index) {
+                                      return TableCard(table: tables[index]);
+                                    },
+                                  ),
+                                );
+                              }).toList(),
+                            );
+                          }
+                          else{
+                            return const Center(child: Text('Empty Table',style: TextStyle(fontSize: 16),));
+                          }
+                        },
+                      ))
+                ],
               );
             }else{
               return const Center(child: Text('Empty Table'));
@@ -176,14 +166,14 @@ class TableCard extends StatelessWidget {
       elevation: 4,
       child: InkWell(
         onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => AddOrderPage()));
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const AddOrderPage()));
         },
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
               table.name,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700,fontFamily: 'Ubuntu'),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
           ],
         ),

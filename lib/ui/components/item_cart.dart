@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-
 import '../themes/colors.dart';
 
 class ItemCart extends StatefulWidget {
@@ -13,10 +12,6 @@ class ItemCart extends StatefulWidget {
 
 class _ItemCartState extends State<ItemCart> with SingleTickerProviderStateMixin {
   late final SlidableController controller;
-
-  void _handleOpen() {
-    controller.openEndActionPane(duration: const Duration(seconds: 1));
-  }
 
   @override
   void initState() {
