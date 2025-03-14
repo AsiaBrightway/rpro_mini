@@ -104,157 +104,6 @@ class _ShoppyApi implements ShoppyApi {
   }
 
   @override
-  Future<ColorResponse?> getColors(String apiKey) async {
-    final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
-    final _headers = <String, dynamic>{r'Authorization': apiKey};
-    _headers.removeWhere((k, v) => v == null);
-    const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<ColorResponse>(Options(
-      method: 'GET',
-      headers: _headers,
-      extra: _extra,
-    )
-        .compose(
-          _dio.options,
-          '/api/colors',
-          queryParameters: queryParameters,
-          data: _data,
-        )
-        .copyWith(
-            baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        )));
-    final _result = await _dio.fetch<Map<String, dynamic>?>(_options);
-    late ColorResponse? _value;
-    try {
-      _value =
-          _result.data == null ? null : ColorResponse.fromJson(_result.data!);
-    } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options);
-      rethrow;
-    }
-    return _value;
-  }
-
-  @override
-  Future<SizeResponse?> getSizes(String apiKey) async {
-    final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
-    final _headers = <String, dynamic>{r'Authorization': apiKey};
-    _headers.removeWhere((k, v) => v == null);
-    const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<SizeResponse>(Options(
-      method: 'GET',
-      headers: _headers,
-      extra: _extra,
-    )
-        .compose(
-          _dio.options,
-          '/api/sizes',
-          queryParameters: queryParameters,
-          data: _data,
-        )
-        .copyWith(
-            baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        )));
-    final _result = await _dio.fetch<Map<String, dynamic>?>(_options);
-    late SizeResponse? _value;
-    try {
-      _value =
-          _result.data == null ? null : SizeResponse.fromJson(_result.data!);
-    } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options);
-      rethrow;
-    }
-    return _value;
-  }
-
-  @override
-  Future<PostMethodResponse?> addSize(
-    String apiKey,
-    SizeRequest request,
-  ) async {
-    final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
-    final _headers = <String, dynamic>{r'Authorization': apiKey};
-    _headers.removeWhere((k, v) => v == null);
-    final _data = <String, dynamic>{};
-    _data.addAll(request.toJson());
-    final _options = _setStreamType<PostMethodResponse>(Options(
-      method: 'POST',
-      headers: _headers,
-      extra: _extra,
-    )
-        .compose(
-          _dio.options,
-          '/api/sizes',
-          queryParameters: queryParameters,
-          data: _data,
-        )
-        .copyWith(
-            baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        )));
-    final _result = await _dio.fetch<Map<String, dynamic>?>(_options);
-    late PostMethodResponse? _value;
-    try {
-      _value = _result.data == null
-          ? null
-          : PostMethodResponse.fromJson(_result.data!);
-    } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options);
-      rethrow;
-    }
-    return _value;
-  }
-
-  @override
-  Future<PostMethodResponse?> updateSizeById(
-    String apiKey,
-    int id,
-    SizeRequest request,
-  ) async {
-    final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
-    final _headers = <String, dynamic>{r'Authorization': apiKey};
-    _headers.removeWhere((k, v) => v == null);
-    final _data = <String, dynamic>{};
-    _data.addAll(request.toJson());
-    final _options = _setStreamType<PostMethodResponse>(Options(
-      method: 'PUT',
-      headers: _headers,
-      extra: _extra,
-    )
-        .compose(
-          _dio.options,
-          '/api/sizes/${id}',
-          queryParameters: queryParameters,
-          data: _data,
-        )
-        .copyWith(
-            baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        )));
-    final _result = await _dio.fetch<Map<String, dynamic>?>(_options);
-    late PostMethodResponse? _value;
-    try {
-      _value = _result.data == null
-          ? null
-          : PostMethodResponse.fromJson(_result.data!);
-    } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options);
-      rethrow;
-    }
-    return _value;
-  }
-
-  @override
   Future<PostMethodResponse?> addBrand(
     String apiKey,
     FormData formData,
@@ -527,42 +376,6 @@ class _ShoppyApi implements ShoppyApi {
   }
 
   @override
-  Future<SubCategoryResponse?> getSubCategories(String apiKey) async {
-    final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
-    final _headers = <String, dynamic>{r'Authorization': apiKey};
-    _headers.removeWhere((k, v) => v == null);
-    const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<SubCategoryResponse>(Options(
-      method: 'GET',
-      headers: _headers,
-      extra: _extra,
-    )
-        .compose(
-          _dio.options,
-          '/api/subCategories',
-          queryParameters: queryParameters,
-          data: _data,
-        )
-        .copyWith(
-            baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        )));
-    final _result = await _dio.fetch<Map<String, dynamic>?>(_options);
-    late SubCategoryResponse? _value;
-    try {
-      _value = _result.data == null
-          ? null
-          : SubCategoryResponse.fromJson(_result.data!);
-    } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options);
-      rethrow;
-    }
-    return _value;
-  }
-
-  @override
   Future<PostMethodResponse?> updateSubCategoryById(
     String apiKey,
     int id,
@@ -644,41 +457,6 @@ class _ShoppyApi implements ShoppyApi {
   }
 
   @override
-  Future<ProductResponse?> getProducts(String apiKey) async {
-    final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
-    final _headers = <String, dynamic>{r'Authorization': apiKey};
-    _headers.removeWhere((k, v) => v == null);
-    const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<ProductResponse>(Options(
-      method: 'GET',
-      headers: _headers,
-      extra: _extra,
-    )
-        .compose(
-          _dio.options,
-          '/api/products',
-          queryParameters: queryParameters,
-          data: _data,
-        )
-        .copyWith(
-            baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        )));
-    final _result = await _dio.fetch<Map<String, dynamic>?>(_options);
-    late ProductResponse? _value;
-    try {
-      _value =
-          _result.data == null ? null : ProductResponse.fromJson(_result.data!);
-    } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options);
-      rethrow;
-    }
-    return _value;
-  }
-
-  @override
   Future<PostMethodResponse?> updateProductById(
     String apiKey,
     int id,
@@ -720,47 +498,17 @@ class _ShoppyApi implements ShoppyApi {
   }
 
   @override
-  Future<SliderResponse?> getSliders(String apiKey) async {
+  Future<LoginResponse?> adminLogin(
+    String name,
+    String password,
+  ) async {
     final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
-    final _headers = <String, dynamic>{r'Authorization': apiKey};
-    _headers.removeWhere((k, v) => v == null);
-    const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<SliderResponse>(Options(
-      method: 'GET',
-      headers: _headers,
-      extra: _extra,
-    )
-        .compose(
-          _dio.options,
-          '/api/sliders',
-          queryParameters: queryParameters,
-          data: _data,
-        )
-        .copyWith(
-            baseUrl: _combineBaseUrls(
-          _dio.options.baseUrl,
-          baseUrl,
-        )));
-    final _result = await _dio.fetch<Map<String, dynamic>?>(_options);
-    late SliderResponse? _value;
-    try {
-      _value =
-          _result.data == null ? null : SliderResponse.fromJson(_result.data!);
-    } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options);
-      rethrow;
-    }
-    return _value;
-  }
-
-  @override
-  Future<LoginResponse?> adminLogin(Map<String, dynamic> body) async {
-    final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'username': name,
+      r'password': password,
+    };
     final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    _data.addAll(body);
+    const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<LoginResponse>(Options(
       method: 'POST',
       headers: _headers,
@@ -768,7 +516,7 @@ class _ShoppyApi implements ShoppyApi {
     )
         .compose(
           _dio.options,
-          '/api/admin/login',
+          '/api/users/login',
           queryParameters: queryParameters,
           data: _data,
         )
@@ -782,6 +530,76 @@ class _ShoppyApi implements ShoppyApi {
     try {
       _value =
           _result.data == null ? null : LoginResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<List<FloorVo>> getFloorList() async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<List<FloorVo>>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+        .compose(
+          _dio.options,
+          '/api/floors',
+          queryParameters: queryParameters,
+          data: _data,
+        )
+        .copyWith(
+            baseUrl: _combineBaseUrls(
+          _dio.options.baseUrl,
+          baseUrl,
+        )));
+    final _result = await _dio.fetch<List<dynamic>>(_options);
+    late List<FloorVo> _value;
+    try {
+      _value = _result.data!
+          .map((dynamic i) => FloorVo.fromJson(i as Map<String, dynamic>))
+          .toList();
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<List<TableVo>> getTableListByFloorId(int id) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<List<TableVo>>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+        .compose(
+          _dio.options,
+          '/api/tables/${id}',
+          queryParameters: queryParameters,
+          data: _data,
+        )
+        .copyWith(
+            baseUrl: _combineBaseUrls(
+          _dio.options.baseUrl,
+          baseUrl,
+        )));
+    final _result = await _dio.fetch<List<dynamic>>(_options);
+    late List<TableVo> _value;
+    try {
+      _value = _result.data!
+          .map((dynamic i) => TableVo.fromJson(i as Map<String, dynamic>))
+          .toList();
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options);
       rethrow;

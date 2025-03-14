@@ -68,7 +68,6 @@ class _PrinterConfigPageState extends State<PrinterConfigPage> {
     super.dispose();
   }
 
-
   Future<void> _saveConfig() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('fontSize', _fontSizeController.text);

@@ -79,9 +79,9 @@ class _AddOrderPageState extends State<AddOrderPage> {
             children: [
               const SizedBox(height: 8),
               // 🔹 Horizontal List
-              Selector<AddItemBloc,List<String>>(
-                selector: (context,bloc) => bloc.categories,
-                builder: (context,categories,_){
+              Selector<AddItemBloc,(List<String>,String)>(
+                selector: (context,bloc) => (bloc.categories,bloc.selectedCategory),
+                builder: (context,data,_){
                   var bloc = context.read<AddItemBloc>();
                   return Container(
                     height: 100,
@@ -89,19 +89,26 @@ class _AddOrderPageState extends State<AddOrderPage> {
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.only(left: 4),
-                      itemCount: categories.length,
+                      itemCount: data.$1.length,
                       itemBuilder: (context, index) {
                         return InkWell(
                           onTap: (){
-                            bloc.onTapCategory(1);
+                            bloc.selectedCategory = data.$1[index];
+                            bloc.onTapCategory(data.$1[index]);
                           },
                           child: Stack(
-                            alignment: Alignment.bottomCenter, // Ensures text stays at the bottom
+                            alignment: Alignment.bottomCenter,
                             children: [
                               // Image Container
                               Container(
                                 margin: const EdgeInsets.all(6),
                                 height: 100,
+                                // decoration: BoxDecoration(
+                                //   border: data.$1[index] == data.$2
+                                //       ? Border.all(width: 3,color: AppColors.colorPrimary50)
+                                //       : Border.all(width: 0),
+                                //   borderRadius: BorderRadius.circular(18),
+                                // ),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(16),
                                   child: CachedNetworkImage(
@@ -124,11 +131,13 @@ class _AddOrderPageState extends State<AddOrderPage> {
                                       bottomLeft: Radius.circular(16),
                                       bottomRight: Radius.circular(16),
                                     ),
-                                    color: Colors.black.withOpacity(0.5),
+                                    color: data.$1[index] == data.$2
+                                        ? Colors.white.withOpacity(0.3)
+                                        : Colors.black.withOpacity(0.5),
                                   ),
                                   padding: const EdgeInsets.symmetric(vertical: 4),
                                   child: Text(
-                                    categories[index],
+                                    data.$1[index],
                                     textAlign: TextAlign.center,
                                     style: const TextStyle(
                                       fontSize: 13,
@@ -206,21 +215,22 @@ class _AddOrderPageState extends State<AddOrderPage> {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           // 🖼 CachedNetworkImage Implementation
-                                          ClipRRect(
-                                            borderRadius: const BorderRadius.only(
-                                              topLeft: Radius.circular(10),
-                                              topRight: Radius.circular(10),
-                                            ),
-                                            child: CachedNetworkImage(
-                                              imageUrl: 'http://rproplus.asiabrightway.com/storage/Images/6731845646151_tiger.jpg',
-                                              height: 110, // Fixed height for better layout control
-                                              width: double.infinity, // Take up the full width of the container
-                                              fit: BoxFit.cover, // Fill the space while maintaining aspect ratio
-                                              placeholder: (context, url) => const Center(child: CircularProgressIndicator()), // Placeholder
-                                              errorWidget: (context, url, error) => const Icon(Icons.error, color: Colors.red), // Error handling
+                                          Expanded(
+                                            child: ClipRRect(
+                                              borderRadius: const BorderRadius.only(
+                                                topLeft: Radius.circular(10),
+                                                topRight: Radius.circular(10),
+                                              ),
+                                              child: CachedNetworkImage(
+                                                imageUrl: 'http://rproplus.asiabrightway.com/storage/Images/6731845646151_tiger.jpg',
+                                                width: double.infinity,
+                                                fit: BoxFit.cover, // Fill the space while maintaining aspect ratio
+                                                placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+                                                errorWidget: (context, url, error) => const Icon(Icons.error, color: Colors.red),
+                                              ),
                                             ),
                                           ),
-                                          // 📌 Title
+                                          /// 📌 Title
                                           const Padding(
                                             padding: EdgeInsets.only(left: 8.0,top: 4),
                                             child: Text(

@@ -1,33 +1,27 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rpro_mini/bloc/home_bloc.dart';
+import 'package:rpro_mini/data/vos/floor_vo.dart';
 import 'package:rpro_mini/data/vos/table_vo.dart';
 import 'package:rpro_mini/ui/components/user_drawer.dart';
 import 'package:rpro_mini/ui/pages/add_order_page.dart';
 import 'package:rpro_mini/ui/themes/colors.dart';
-import '../../bloc/auth_provider.dart';
 
 class HomePage extends StatefulWidget {
-  final List<String> floors;
-  const HomePage({super.key, required this.floors});
+
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin{
-  TabController? _tabController;
+class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: widget.floors.length, vsync: this);
-    _initializeData();
-  }
 
-  Future<void> _initializeData() async{
-    final authModel = Provider.of<AuthProvider>(context,listen: false);
-    authModel.loadToken();
   }
 
   @override
@@ -36,121 +30,94 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       create: (context) => HomeBloc(),
       child: Scaffold(
         appBar: AppBar(
-          toolbarHeight: kToolbarHeight,
-          title: const Text('R Pro',style: TextStyle(color: Colors.white)),
+          toolbarHeight: 80,
           iconTheme: const IconThemeData(
             color: Colors.white, // Set the drawer icon color
           ),
+          title: const Text('R Pro', style: TextStyle(color: Colors.white)),
           backgroundColor: AppColors.colorPrimary,
           centerTitle: true,
-
         ),
         drawer: const UserDrawer(),
-        body: Selector<HomeBloc,List<String>>(
-          selector: (context,bloc) => bloc.floors,
-          builder: (context,floors,_){
-            if(floors.isNotEmpty){
-              return Column(
+        body: Selector<HomeBloc,List<FloorVo>>(
+            selector: (context,bloc) => bloc.floors,
+            builder: (context,floors,_){
+              var bloc = context.read<HomeBloc>();
+              return  Column(
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: TabBar(
-                      controller: _tabController,
-                      isScrollable: true, // Keep this for many tabs
-                      labelColor: Colors.white, // Text color when selected
-                      unselectedLabelColor: Colors.grey[800], // Text color when unselected
-                      labelStyle: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5,
-                      ),
-                      unselectedLabelStyle: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      indicator: BoxDecoration( // Custom box indicator
-                        color: AppColors.colorPrimary, // Background color for selected tab
-                        borderRadius: BorderRadius.circular(8), // Rounded corners
-                      ),
-                      indicatorPadding: const EdgeInsets.symmetric(vertical: 13), // Padding around the box
-                      labelPadding: const EdgeInsets.only(right: 16,top: 8,bottom: 8), // Padding inside the tab
-                      tabs: floors.map((floor) {
-                        return Tab(
-                          child: Container(
-                            margin: const EdgeInsets.only(right: 8,left: 8),
-                            padding: const EdgeInsets.symmetric(vertical: 6), // Inner padding for text
-                            decoration: BoxDecoration(
-                              // Unselected tab decoration (optional)
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              floor.toString(),
-                              style: const TextStyle(
-                                fontSize: 14,
+                  Selector<HomeBloc,String?>(
+                    selector: (context,bloc) => bloc.selectedFloor,
+                    builder: (context,selectedFloor,_){
+                      return Container(
+                        margin: const EdgeInsets.only(top: 8),
+                        height: 40,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: floors.length,
+                          itemBuilder: (context, index) {
+                            final floor = floors[index];
+                            final isSelected = floor.floorName == selectedFloor;
+                            return GestureDetector(
+                              onTap: () {
+                                bloc.selectedFloor = floors[index].floorName;
+                                bloc.fetchTables(floors[index].floorId); // Update selected day in bloc
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                                margin: const EdgeInsets.symmetric(horizontal: 8),
+                                decoration: BoxDecoration(
+                                  color: isSelected ? AppColors.colorPrimary : Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    floors[index].floorName  ,
+                                    style: TextStyle(
+                                      color: isSelected ? Colors.white : Colors.black,
+                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
+                            );
+                          },
+                        ),
+                      );
+                    },
                   ),
                   Expanded(
-                      child: Selector<HomeBloc,List<TableVo>>(
-                        selector: (context,bloc) => bloc.tables,
-                        builder: (context,tables,_){
-                          if(tables.isNotEmpty){
-                            return TabBarView(
-                              controller: _tabController,
-                              children: floors.map((floor) {
-                                return Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: GridView.builder(
-                                    padding: const EdgeInsets.only(top: 30),
-                                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 4,
-                                      crossAxisSpacing: 8,
-                                      mainAxisSpacing: 8,
-                                      childAspectRatio: 1.1,
-                                    ),
-                                    itemCount: tables.length,
-                                    itemBuilder: (context, index) {
-                                      return TableCard(table: tables[index]);
-                                    },
-                                  ),
-                                );
-                              }).toList(),
+                      child: Selector<HomeBloc, List<TableVo>>(
+                        selector: (context, bloc) => bloc.tables,
+                        builder: (context, tables, _) {
+                          if (tables.isNotEmpty) {
+                            return Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: GridView.builder(
+                                padding: const EdgeInsets.only(top: 30),
+                                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 4,
+                                  crossAxisSpacing: 8,
+                                  mainAxisSpacing: 8,
+                                  childAspectRatio: 1.1,
+                                ),
+                                itemCount: tables.length,
+                                itemBuilder: (context, index) {
+                                  return TableCard(table: tables[index]);
+                                },
+                              ),
                             );
+                          } else {
+                            return const Center(
+                                child: Text('Empty Table', style: TextStyle(fontSize: 16)));
                           }
-                          else{
-                            return const Center(child: Text('Empty Table',style: TextStyle(fontSize: 16),));
-                          }
-                        },
-                      ))
+                    },
+                  ))
                 ],
               );
-            }else{
-              return const Center(child: Text('Empty Table'));
             }
-          },
         ),
-
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _tabController?.dispose();
-    super.dispose();
   }
 }
 
@@ -172,7 +139,7 @@ class TableCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              table.name,
+              table.tableName,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
           ],

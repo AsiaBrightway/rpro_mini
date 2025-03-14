@@ -3,13 +3,19 @@ part 'table_vo.g.dart';
 
 @JsonSerializable()
 class TableVo{
-  @JsonKey(name: 'id')
-  final int id;
+  @JsonKey(name: 'table_id')
+  final int tableId;
 
-  @JsonKey(name: 'name')
-  final String name;
+  @JsonKey(name: 'table_name')
+  final String tableName;
 
-  TableVo(this.id, this.name);
+  @JsonKey(name: 'floor_id')
+  final int floorId;
+
+  @JsonKey(name: 'is_open')
+  final int isOpen;
+
+  TableVo(this.tableId, this.tableName, this.floorId, this.isOpen);
 
   factory TableVo.fromJson(Map<String,dynamic> json) => _$TableVoFromJson(json);
 

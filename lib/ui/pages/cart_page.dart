@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:rpro_mini/ui/components/item_cart.dart';
+import 'package:rpro_mini/ui/pages/setting_page.dart';
 import 'package:rpro_mini/ui/themes/colors.dart';
 
 class CartPage extends StatefulWidget {
@@ -55,7 +56,7 @@ class _CartPageState extends State<CartPage> {
                     ),
                     child: TextButton(
                         onPressed:(){
-
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => SettingPage()));
                         },
                         child: Text('Place Order',style: TextStyle(color: Colors.white),)),
                   )

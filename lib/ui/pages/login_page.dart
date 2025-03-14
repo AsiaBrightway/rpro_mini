@@ -2,7 +2,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:rpro_mini/data/models/shoppy_admin_model.dart';
+import 'package:rpro_mini/ui/pages/home_page.dart';
 import 'package:rpro_mini/ui/pages/splash_page.dart';
+import 'package:rpro_mini/utils/helper_functions.dart';
 import '../../bloc/auth_provider.dart';
 import '../themes/colors.dart';
 
@@ -17,6 +20,7 @@ class _LoginPageState extends State<LoginPage> {
 
   final _userNameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final ShoppyAdminModel _model = ShoppyAdminModel();
   final RegExp emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
   String? _nameErrorMessage;
   String userName = '';
@@ -31,29 +35,31 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _onClickLogin() async {
-    setState(() {
-      isLoading = true;
-    });
     if (_userNameController.text.isEmpty) {
       setState(() {
-        isLoading = false;
         _nameErrorMessage = 'Username is require';
       });
       return;
     } else if (_passwordController.text.isEmpty) {
       setState(() {
-        isLoading = false;
         _nameErrorMessage = null;
         _passwordErrorMessage = 'Password is require';
       });
     }
     else {
-      final authModel = Provider.of<AuthProvider>(context,listen: false);
-      authModel.saveTokenToDatabase(_userNameController.text, _passwordController.text);
-      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const SplashPage()),(routes) => false);
       setState(() {
-        _passwordErrorMessage = null;
+        isLoading = true;
         _nameErrorMessage = null;
+        _passwordErrorMessage = null;
+      });
+      _model.adminLogin(_userNameController.text, _passwordController.text).then((onValue){
+        setState(() { isLoading = false; });
+        final authModel = Provider.of<AuthProvider>(context,listen: false);
+        authModel.saveTokenToDatabase(_userNameController.text, _passwordController.text);
+        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const HomePage()),(routes) => false);
+      }).catchError((onError){
+        setState(() { isLoading = false; });
+        showAlertDialogBox(context, 'Login failed !', onError.toString());
       });
     }
   }

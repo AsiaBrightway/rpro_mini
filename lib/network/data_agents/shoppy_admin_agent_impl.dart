@@ -2,19 +2,15 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:rpro_mini/data/vos/floor_vo.dart';
 import 'package:rpro_mini/data/vos/request/color_request_vo.dart';
 import 'package:rpro_mini/data/vos/request/product_request_vo.dart';
-import 'package:rpro_mini/data/vos/request/size_request.dart';
+import 'package:rpro_mini/data/vos/table_vo.dart';
 import 'package:rpro_mini/network/data_agents/shoppy_admin_agent.dart';
 import 'package:rpro_mini/network/responses/brand_response.dart';
 import 'package:rpro_mini/network/responses/category_response.dart';
-import 'package:rpro_mini/network/responses/color_response.dart';
 import 'package:rpro_mini/network/responses/login_response.dart';
 import 'package:rpro_mini/network/responses/post_method_response.dart';
-import 'package:rpro_mini/network/responses/product_response.dart';
-import 'package:rpro_mini/network/responses/size_response.dart';
-import 'package:rpro_mini/network/responses/slider_response.dart';
-import 'package:rpro_mini/network/responses/sub_category_response.dart';
 import 'package:rpro_mini/network/shoppy_api.dart';
 import '../../data/vos/error_vo.dart';
 import '../../exception/custom_exception.dart';
@@ -96,36 +92,8 @@ class ShoppyAdminAgentImpl extends ShoppyAdminAgent{
 
 
   @override
-  Future<ColorResponse?> getColors(String token,) {
-    return shoppyApi.getColors(token).catchError((onError){
-      throw _createException(onError);
-    });
-  }
-
-  @override
   Future<PostMethodResponse?> updateColor(String token,int id,ColorRequestVo request) {
     return shoppyApi.updateColorById(token, id, request).catchError((onError){
-      throw _createException(onError);
-    });
-  }
-
-  @override
-  Future<PostMethodResponse?> addSize(String token,SizeRequest request) {
-    return shoppyApi.addSize(token,request).catchError((onError){
-      throw _createException(onError);
-    });
-  }
-
-  @override
-  Future<SizeResponse?> getSizes(String token,) {
-    return shoppyApi.getSizes(token).catchError((onError){
-      throw _createException(onError);
-    });
-  }
-
-  @override
-  Future<PostMethodResponse?> updateSizeById(String token,int id, SizeRequest request) {
-    return shoppyApi.updateSizeById(token,id, request).catchError((onError){
       throw _createException(onError);
     });
   }
@@ -254,13 +222,6 @@ class ShoppyAdminAgentImpl extends ShoppyAdminAgent{
   }
 
   @override
-  Future<SubCategoryResponse?> getSubCategories(String token,) {
-    return shoppyApi.getSubCategories(token).catchError((onError){
-      throw _createException(onError);
-    });
-  }
-
-  @override
   Future<PostMethodResponse?> updateSubCategoryById(String token,int id, int categoryId, String name, File? image) async{
     final Map<String, dynamic> data = {
       "category_id": id,
@@ -291,19 +252,8 @@ class ShoppyAdminAgentImpl extends ShoppyAdminAgent{
   }
 
   @override
-  Future<ProductResponse?> getProducts(String token,) {
-    return shoppyApi.getProducts(token).catchError((onError){
-      throw _createException(onError);
-    });
-  }
-
-  @override
   Future<LoginResponse?> adminLogin(String name, String password) {
-    final Map<String, dynamic> data = {
-      "user_name": name,
-      "password": password,
-    };
-    return shoppyApi.adminLogin(data).catchError((onError){
+    return shoppyApi.adminLogin(name,password).catchError((onError){
       throw _createException(onError);
     });
   }
@@ -316,9 +266,17 @@ class ShoppyAdminAgentImpl extends ShoppyAdminAgent{
   }
 
   @override
-  Future<SliderResponse?> getSliders(String token) {
-    return shoppyApi.getSliders(token).catchError((onError){
+  Future<List<FloorVo>> getFloors() {
+    return shoppyApi.getFloorList().catchError((onError){
       throw _createException(onError);
     });
   }
+
+  @override
+  Future<List<TableVo>?> getTablesByFloorId(int floorId) {
+    return shoppyApi.getTableListByFloorId(floorId).catchError((onError){
+      throw _createException(onError);
+    });
+  }
+
 }

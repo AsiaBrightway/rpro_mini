@@ -1,16 +1,13 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:retrofit/http.dart';
-import 'package:rpro_mini/data/vos/request/size_request.dart';
+import 'package:rpro_mini/data/vos/floor_vo.dart';
+import 'package:rpro_mini/data/vos/table_vo.dart';
 import 'package:rpro_mini/network/responses/brand_response.dart';
 import 'package:rpro_mini/network/responses/category_response.dart';
-import 'package:rpro_mini/network/responses/color_response.dart';
 import 'package:rpro_mini/network/responses/login_response.dart';
 import 'package:rpro_mini/network/responses/parse_error_logger.dart';
 import 'package:rpro_mini/network/responses/post_method_response.dart';
-import 'package:rpro_mini/network/responses/product_response.dart';
-import 'package:rpro_mini/network/responses/size_response.dart';
-import 'package:rpro_mini/network/responses/slider_response.dart';
-import 'package:rpro_mini/network/responses/sub_category_response.dart';
 import '../data/vos/request/color_request_vo.dart';
 import '../data/vos/request/product_request_vo.dart';
 import 'api_constants.dart';
@@ -33,25 +30,6 @@ abstract class ShoppyApi{
       @Header(kParamAuthorization) String apiKey,
       @Path() int id,
       @Body() ColorRequestVo requestBody
-      );
-
-  @GET(kEndPointColors)
-  Future<ColorResponse?> getColors(@Header(kParamAuthorization) String apiKey);
-
-  @GET(kEndPointSizes)
-  Future<SizeResponse?> getSizes(@Header(kParamAuthorization) String apiKey,);
-
-  @POST(kEndPointSizes)
-  Future<PostMethodResponse?> addSize(
-      @Header(kParamAuthorization) String apiKey,
-      @Body() SizeRequest request
-      );
-
-  @PUT("$kEndPointSizes/{id}")
-  Future<PostMethodResponse?> updateSizeById(
-      @Header(kParamAuthorization) String apiKey,
-      @Path() int id,
-      @Body() SizeRequest request
       );
 
   @POST(kEndPointBrands)
@@ -95,11 +73,6 @@ abstract class ShoppyApi{
       @Body() FormData formData
       );
 
-  @GET(kEndPointSubCategories)
-  Future<SubCategoryResponse?> getSubCategories(
-      @Header(kParamAuthorization) String apiKey,
-      );
-
   @PUT("$kEndPointSubCategories/{id}")
   Future<PostMethodResponse?> updateSubCategoryById(
       @Header(kParamAuthorization) String apiKey,
@@ -113,9 +86,6 @@ abstract class ShoppyApi{
       @Body() ProductRequestVo body
       );
 
-  @GET(kEndPointProducts)
-  Future<ProductResponse?> getProducts(@Header(kParamAuthorization) String apiKey,);
-
   @PUT("$kEndPointProducts/{id}")
   Future<PostMethodResponse?> updateProductById(
       @Header(kParamAuthorization) String apiKey,
@@ -123,13 +93,17 @@ abstract class ShoppyApi{
       @Body() ProductRequestVo body
       );
 
-  @GET(kEndPointSlider)
-  Future<SliderResponse?> getSliders(
-      @Header(kParamAuthorization) String apiKey,
-      );
-
   @POST(kEndPointAdminAuth)
   Future<LoginResponse?> adminLogin(
-      @Body() Map<String, dynamic> body,
+      @Query('username') String name,
+      @Query('password') String password,
+      );
+
+  @GET(kEndPointFloor)
+  Future<List<FloorVo>> getFloorList();
+
+  @GET("$kEndPointTables/{id}")
+  Future<List<TableVo>> getTableListByFloorId(
+      @Path("id") int id,
       );
 }

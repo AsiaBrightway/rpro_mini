@@ -1,6 +1,7 @@
 // printer_service.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 import 'package:rpro_mini/utils/helper_functions.dart';
 
@@ -8,12 +9,25 @@ class PrinterService extends ChangeNotifier {
   List<BluetoothInfo> pairedDevices = [];
   String tips = '';
   bool disconnected = false;
-  bool connected = false;
+  bool _connected = false;
   String? _selectedDeviceMac;
   bool? _isBluetoothEnabled;
 
+
+  bool get connected => _connected;
+
+  set connected(bool value) {
+    _connected = value;
+    notifyListeners();
+  }
+
   bool? get isBluetoothEnabled => _isBluetoothEnabled;
   String? get selectedDeviceMac => _selectedDeviceMac;
+
+  set isBluetoothEnabled(bool? value) {
+    _isBluetoothEnabled = value;
+    notifyListeners();
+  }
 
   Future<void> getPairedDevices() async {
     try {
@@ -36,7 +50,7 @@ class PrinterService extends ChangeNotifier {
     try {
       connected = await PrintBluetoothThermal.connect(macPrinterAddress: macAddress);
       if(!connected){
-        showScaffoldMessage(context, 'Failed to connect');
+
       }
       else{
         _selectedDeviceMac = macAddress;

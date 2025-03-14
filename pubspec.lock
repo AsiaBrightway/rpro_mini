@@ -297,14 +297,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.9"
-  esc_pos_utils_plus:
-    dependency: "direct main"
-    description:
-      name: esc_pos_utils_plus
-      sha256: "2a22d281cb6f04600ba3ebd607ad8df03a4b2446d814007d22525bab4d50c2ff"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.4"
   fake_async:
     dependency: transitive
     description:
@@ -430,6 +422,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.4.1"
+  flutter_esc_pos_utils:
+    dependency: "direct main"
+    description:
+      name: flutter_esc_pos_utils
+      sha256: "2186973896d2dac3d5ebb2e09dac963001d29cd9e683f23afe8dbd5fb4013356"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   flutter_floating_bottom_bar:
     dependency: "direct main"
     description:
@@ -510,14 +510,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.6.1"
-  flutter_slidable:
-    dependency: "direct main"
-    description:
-      name: flutter_slidable
-      sha256: a857de7ea701f276fd6a6c4c67ae885b60729a3449e42766bb0e655171042801
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.1.2"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -544,6 +536,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.0"
+  gbk_codec:
+    dependency: transitive
+    description:
+      name: gbk_codec
+      sha256: "3af5311fc9393115e3650ae6023862adf998051a804a08fb804f042724999f61"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.0"
   glob:
     dependency: transitive
     description:
@@ -560,6 +560,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.2"
+  hex:
+    dependency: transitive
+    description:
+      name: hex
+      sha256: "4e7cd54e4b59ba026432a6be2dd9d96e4c5205725194997193bf871703b82c4a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
   html:
     dependency: transitive
     description:
@@ -617,7 +625,7 @@ packages:
     source: hosted
     version: "0.8.12+12"
   image_picker_for_web:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: image_picker_for_web
       sha256: "717eb042ab08c40767684327be06a5d8dbb341fe791d514e4b92c7bbe1b7bb83"
@@ -1160,14 +1168,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.1"
-  skeletonizer:
-    dependency: "direct main"
-    description:
-      name: skeletonizer
-      sha256: "0dcacc51c144af4edaf37672072156f49e47036becbc394d7c51850c5c1e884b"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.4.3"
   sky_engine:
     dependency: transitive
     description: flutter

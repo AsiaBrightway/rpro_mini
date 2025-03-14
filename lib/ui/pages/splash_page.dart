@@ -2,10 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rpro_mini/bloc/home_bloc.dart';
+import 'package:rpro_mini/data/models/shoppy_admin_model.dart';
 import 'package:rpro_mini/ui/pages/home_page.dart';
 import 'package:rpro_mini/ui/pages/login_page.dart';
 import 'package:rpro_mini/ui/pages/url_page.dart';
 import 'package:rpro_mini/ui/themes/colors.dart';
+import 'package:rpro_mini/utils/helper_functions.dart';
 
 import '../../bloc/auth_provider.dart';
 
@@ -18,6 +20,8 @@ class SplashPage extends StatefulWidget {
 
 class _SplashPageState extends State<SplashPage> {
 
+  final ShoppyAdminModel _model = ShoppyAdminModel();
+
   @override
   void initState() {
     super.initState();
@@ -25,24 +29,26 @@ class _SplashPageState extends State<SplashPage> {
       _checkLoginStatus();
     });
   }
-
+  
   Future<void> _checkLoginStatus() async{
-    HomeBloc homeBloc = Provider.of<HomeBloc>(context,listen: false);
-    var floors = homeBloc.floors;
     AuthProvider authProvider = Provider.of<AuthProvider>(context,listen: false);
-    await Future.delayed(const Duration(seconds: 2));
     await Provider.of<AuthProvider>(context,listen: false).loadToken();
     String url = authProvider.url;
     String name = authProvider.userName;
-    // String password = authProvider.password;
+    String password = authProvider.password;
+    await Future.delayed(const Duration(milliseconds: 500));
     if(url.isEmpty){
       if(!mounted) return;
-      Navigator.push(context, MaterialPageRoute(builder: (context) => const UrlPage()));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const UrlPage()));
     }
     ///we will use network and check name and password
     else if(name.isNotEmpty){
       if(!mounted) return;
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage(floors: floors,)));
+      _model.adminLogin(name, password).then((onValue){
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomePage()));
+      }).catchError((error){
+        showAlertDialogBox(context,'Login Error',error.toString());
+      });
     }else{
       if(!mounted) return;
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginPage()));

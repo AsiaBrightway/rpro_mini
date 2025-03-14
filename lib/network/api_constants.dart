@@ -7,5 +7,9 @@ const String kEndPointBrands = "/api/brands";
 const String kEndPointCategories = "/api/categories";
 const String kEndPointSubCategories = "/api/subCategories";
 const String kEndPointProducts = "/api/products";
-const String kEndPointAdminAuth = "/api/admin/login";
+const String kEndPointAdminAuth = "/api/users/login";
 const String kEndPointSlider = "/api/sliders";
+
+const String kEndPointFloor = "/api/floors";
+const String kEndPointTables = "/api/tables";
+
