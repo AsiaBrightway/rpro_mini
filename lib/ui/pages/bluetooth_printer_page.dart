@@ -1,6 +1,5 @@
 
 import 'package:flutter/material.dart';
-import 'package:flutter_esc_pos_utils/flutter_esc_pos_utils.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 import 'package:provider/provider.dart';
 import 'package:rpro_mini/ui/components/screenshot_widget.dart';
@@ -27,11 +26,11 @@ class _BluetoothPrinterPageState extends State<BluetoothPrinterPage> {
 
   Future<void> _printSampleReceipt() async {
     var bloc = context.read<PrinterService>();
-      final profile = await CapabilityProfile.load();
-      final generator = Generator(PaperSize.mm80, profile);
+      // final profile = await CapabilityProfile.load();
+      // final generator = Generator(PaperSize.mm80, profile);
       List<int> bytes = [];
       final image = decodeImage(theimageThatComesfromThePrinter);
-      bytes += generator.imageRaster(image!);
+      // bytes += generator.imageRaster(image!);
       await PrintBluetoothThermal.writeBytes(bytes);
       if(!mounted){
         bloc.disconnectToDevice();
@@ -47,7 +46,7 @@ class _BluetoothPrinterPageState extends State<BluetoothPrinterPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Center(
-              child: ScreenshotReceiptWidget(screenshotController: screenshotController),
+              child: ScreenshotReceiptWidget(screenshotController: screenshotController, listWidth: 260,textSize: 14),
             ),
             const SizedBox(height: 8),
             ElevatedButton.icon(

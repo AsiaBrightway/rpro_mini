@@ -1,26 +1,58 @@
-
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:rpro_mini/bloc/add_item_bloc.dart';
+import 'package:rpro_mini/bloc/add_order_bloc.dart';
 import 'package:rpro_mini/bloc/auth_provider.dart';
+import 'package:rpro_mini/data/vos/category_vo.dart';
+import 'package:rpro_mini/data/vos/item_vo.dart';
 import 'package:rpro_mini/ui/components/flying_animation.dart';
 import 'package:rpro_mini/ui/pages/cart_page.dart';
 import 'package:rpro_mini/ui/themes/colors.dart';
 
 class AddOrderPage extends StatefulWidget {
-  const AddOrderPage({super.key});
+  final String? tableName;
+  const AddOrderPage({super.key, this.tableName});
 
   @override
   State<AddOrderPage> createState() => _AddOrderPageState();
 }
 
 class _AddOrderPageState extends State<AddOrderPage> {
+  final _searchController = TextEditingController();
+  bool isSearching = false;
   final GlobalKey cartKey = GlobalKey();
+  String baseUrl = "";
   List<GlobalKey> _itemKeys = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeData();
+  }
+
+  Future<void> _initializeData() async{
+    final authModel = Provider.of<AuthProvider>(context,listen: false);
+    baseUrl = authModel.url;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final authModel = Provider.of<AuthProvider>(context, listen: false);
+    setState(() {
+      baseUrl = authModel.url;
+    });
+  }
 
   void _onBackPressed() {
     Navigator.of(context).pop();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   void _animateToCart(BuildContext context, GlobalKey itemKey) {
@@ -52,12 +84,15 @@ class _AddOrderPageState extends State<AddOrderPage> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+
+    int crossAxisCount = screenWidth > 600 ? 3 : 2; // Tablet (3), Phone (2)
     return ChangeNotifierProvider(
-      create: (context) => AddItemBloc(),
+      create: (context) => AddOrderBloc(),
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          title: const Text("Food Items",style: TextStyle(color: Colors.white)),
+          title: Text(widget.tableName ?? "",style: const TextStyle(color: Colors.white)),
           centerTitle: true,
           backgroundColor: AppColors.colorPrimary,
           leading: IconButton(
@@ -78,120 +113,194 @@ class _AddOrderPageState extends State<AddOrderPage> {
           child: Column(
             children: [
               const SizedBox(height: 8),
-              // 🔹 Horizontal List
-              Selector<AddItemBloc,(List<String>,String)>(
-                selector: (context,bloc) => (bloc.categories,bloc.selectedCategory),
-                builder: (context,data,_){
-                  var bloc = context.read<AddItemBloc>();
-                  return Container(
-                    height: 100,
-                    alignment: Alignment.bottomCenter,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.only(left: 4),
-                      itemCount: data.$1.length,
-                      itemBuilder: (context, index) {
-                        return InkWell(
-                          onTap: (){
-                            bloc.selectedCategory = data.$1[index];
-                            bloc.onTapCategory(data.$1[index]);
-                          },
-                          child: Stack(
-                            alignment: Alignment.bottomCenter,
+              ///🔹 Horizontal List
+              Selector<AddOrderBloc,bool>(
+                  selector: (context,bloc) => bloc.isSearching,
+                  builder: (context,isSearching,_){
+                    var bloc = context.read<AddOrderBloc>();
+
+                    return Column(
+                      children: [
+                        (isSearching)
+                            ? Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 8),
+                          child: Row(
                             children: [
-                              // Image Container
-                              Container(
-                                margin: const EdgeInsets.all(6),
-                                height: 100,
-                                // decoration: BoxDecoration(
-                                //   border: data.$1[index] == data.$2
-                                //       ? Border.all(width: 3,color: AppColors.colorPrimary50)
-                                //       : Border.all(width: 0),
-                                //   borderRadius: BorderRadius.circular(18),
-                                // ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(16),
-                                  child: CachedNetworkImage(
-                                    imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSk1XUzPI3MBwANtXUkr3RohaUIg4f0sWET9g&s',
-                                    fit: BoxFit.cover,
-                                    placeholder: (context, url) => const Center(child: CircularProgressIndicator()), // Loading
-                                    errorWidget: (context, url, error) => const Icon(Icons.error, color: Colors.red), // Error
+                              /// Search TextField
+                              Expanded(
+                                child: TextField(
+                                  autofocus: true,
+                                  onChanged: (value){
+                                    bloc.queryStreamController.sink.add(value);
+                                  },
+                                  controller: _searchController,
+                                  decoration: InputDecoration(
+                                    hintText: 'Search Items...',
+                                    prefixIcon: Icon(Icons.search,color: AppColors.cartBgColor),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
                                   ),
                                 ),
                               ),
-                              /// Gradient Effect for Better Text Visibility
-                              Positioned(
-                                bottom: 0, // Positions at the bottom
-                                left: 0,
-                                right: 0,
-                                child: Container(
-                                  margin: const EdgeInsets.all(6),
-                                  decoration: BoxDecoration(
-                                    borderRadius: const BorderRadius.only(
-                                      bottomLeft: Radius.circular(16),
-                                      bottomRight: Radius.circular(16),
-                                    ),
-                                    color: data.$1[index] == data.$2
-                                        ? Colors.white.withOpacity(0.3)
-                                        : Colors.black.withOpacity(0.5),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(vertical: 4),
-                                  child: Text(
-                                    data.$1[index],
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      color: Colors.white, // White text for contrast
-                                      fontWeight: FontWeight.w500,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ),
+                              const SizedBox(width: 8),
+
+                              /// Close Search Button
+                              IconButton(
+                                icon: const Icon(Icons.close, color: Colors.black38),
+                                onPressed: () {
+                                  bloc.isSearching = !isSearching;
+                                },
                               ),
                             ],
                           ),
-                        );
-                      },
-                    ),
-                  );
-                },
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text('Choose Items',style: TextStyle(color: AppColors.colorPrimary,fontFamily: 'Ubuntu',fontWeight: FontWeight.w600,fontSize: 16)),
-                  ),
-                  Selector<AuthProvider,String>(
-                    selector: (context,authBloc) => authBloc.layout,
-                    builder: (context,layout,_){
-                      return IconButton(
-                        icon: Icon(layout == 'list'
-                            ? Icons.list
-                            : Icons.grid_view,color: Colors.black38),
-                        onPressed: () {
-                          var bloc = context.read<AuthProvider>();
-                          bloc.toggleLayout();
-                        },
-                      );
-                    },
-                  ),
-                ],
+                        )
+                            : Selector<AddOrderBloc,(List<CategoryVo>,String)>(
+                          selector: (context,bloc) => (bloc.categories,bloc.selectedCategory),
+                          builder: (context,data,_){
+                            var bloc = context.read<AddOrderBloc>();
+                            return Container(
+                              height: 100,
+                              alignment: Alignment.bottomCenter,
+                              child: ListView.builder(
+                                key: const PageStorageKey('category_list'),
+                                scrollDirection: Axis.horizontal,
+                                itemExtent: 110,
+                                addAutomaticKeepAlives: true,
+                                padding: const EdgeInsets.only(left: 4),
+                                itemCount: data.$1.length,
+                                itemBuilder: (context, index) {
+                                  return InkWell(
+                                    onTap: (){
+                                      bloc.selectedCategory = data.$1[index].categoryName;
+                                      bloc.onTapCategory(data.$1[index].categoryName);
+                                    },
+                                    child: Stack(
+                                      alignment: Alignment.bottomCenter,
+                                      children: [
+                                        // Image Container
+                                        Container(
+                                          margin: const EdgeInsets.all(6),
+                                          height: 100,
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(16),
+                                            child: CachedNetworkImage(
+                                              imageUrl: '$baseUrl/storage/Images/${data.$1[index].categoryImage}',
+                                              width: 100,
+                                              height: 100,
+                                              fit: BoxFit.cover,
+                                              placeholder: (context, url) => Center(
+                                                child: CupertinoActivityIndicator(
+                                                  color: AppColors.colorPrimary,
+                                                ),
+                                              ),
+                                              errorWidget: (context, url, error) => const Icon(
+                                                Icons.error,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        /// Gradient Effect for Better Text Visibility
+                                        Positioned(
+                                          bottom: 0, // Positions at the bottom
+                                          left: 0,
+                                          right: 0,
+                                          child: Container(
+                                            margin: const EdgeInsets.all(6),
+                                            decoration: BoxDecoration(
+                                              borderRadius: const BorderRadius.only(
+                                                bottomLeft: Radius.circular(16),
+                                                bottomRight: Radius.circular(16),
+                                              ),
+                                              color: data.$1[index].categoryName == data.$2
+                                                  ? Colors.white.withOpacity(0.8)
+                                                  : Colors.black.withOpacity(0.5),
+                                            ),
+                                            padding: const EdgeInsets.symmetric(vertical: 4),
+                                            child: Text(
+                                              data.$1[index].categoryName,
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: data.$1[index].categoryName == data.$2 ? Colors.black87 :Colors.white, // White text for contrast
+                                                fontWeight: data.$1[index].categoryName == data.$2 ? FontWeight.w700 : FontWeight.w400,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                        ),
+
+                        /// search and filter button
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text('Choose Items',style: TextStyle(color: AppColors.colorPrimary,fontFamily: 'Ubuntu',fontWeight: FontWeight.w600,fontSize: 16)),
+                            ),
+                            Selector<AddOrderBloc,ItemState>(
+                                selector: (context,bloc) => bloc.itemState,
+                                builder: (context,itemState,_){
+                                  if(itemState == ItemState.loading){
+                                    return CupertinoActivityIndicator(color: AppColors.colorPrimary,);
+                                  }else{
+                                    return const SizedBox(width: 1);
+                                  }
+                                },
+                            ),
+                            Row(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.search, color: Colors.black38),
+                                  onPressed: () {
+                                    var bloc = context.read<AddOrderBloc>();
+                                    bloc.isSearching = !bloc.isSearching;
+                                  },
+                                ),
+                                Selector<AuthProvider,String>(
+                                  selector: (context,authBloc) => authBloc.layout,
+                                  builder: (context,layout,_){
+                                    return IconButton(
+                                      icon: Icon(layout == 'list'
+                                          ? Icons.list
+                                          : Icons.grid_view,color: Colors.black38),
+                                      onPressed: () {
+                                        var bloc = context.read<AuthProvider>();
+                                        bloc.toggleLayout();
+                                      },
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                        )
+                      ],
+                    );
+                  },
               ),
               // 🔹 Grid View
               Selector<AuthProvider,String>(
                 selector: (context,bloc)=> bloc.layout,
                   builder: (context,layout,_){
-                  return Selector<AddItemBloc,List<String>>(
+                  return Selector<AddOrderBloc,List<ItemVo>>(
                       selector: (context,itemBloc) => itemBloc.items,
                       builder: (context,itemList,_){
                         _itemKeys = List.generate(itemList.length, (index) => GlobalKey());
                         if(layout == 'grid'){
                           return Expanded(
                             child: GridView.builder(
-                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
+                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: crossAxisCount,
                                 childAspectRatio: 1,
                                 crossAxisSpacing: 10,
                                 mainAxisSpacing: 10,
@@ -222,37 +331,27 @@ class _AddOrderPageState extends State<AddOrderPage> {
                                                 topRight: Radius.circular(10),
                                               ),
                                               child: CachedNetworkImage(
-                                                imageUrl: 'http://rproplus.asiabrightway.com/storage/Images/6731845646151_tiger.jpg',
+                                                imageUrl: '$baseUrl/storage/Images/${itemList[index].image}',
                                                 width: double.infinity,
-                                                fit: BoxFit.cover, // Fill the space while maintaining aspect ratio
-                                                placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
-                                                errorWidget: (context, url, error) => const Icon(Icons.error, color: Colors.red),
+                                                fit: BoxFit.cover,
+                                                errorWidget: (context, url, error) => const Icon(Icons.image, color: Colors.grey),
                                               ),
                                             ),
                                           ),
                                           /// 📌 Title
-                                          const Padding(
-                                            padding: EdgeInsets.only(left: 8.0,top: 4),
+                                          Padding(
+                                            padding: const EdgeInsets.only(left: 8.0,top: 4),
                                             child: Text(
-                                              'Carlsberg',
-                                              style: TextStyle(fontSize: 14),
-                                              textAlign: TextAlign.center, // Center title
-                                            ),
-                                          ),
-                                          const Padding(
-                                            padding: EdgeInsets.only(left: 8.0),
-                                            child: Text(
-                                              '2400 MMK',
-                                              style: TextStyle(fontSize: 15,fontWeight: FontWeight.w700),
+                                              itemList[index].itemName ?? '',
+                                              style: const TextStyle(fontSize: 14),
                                               textAlign: TextAlign.center, // Center title
                                             ),
                                           ),
                                           Padding(
                                             padding: const EdgeInsets.only(left: 8.0),
                                             child: Text(
-                                              'Store Qty: 23',
-                                              style: TextStyle(
-                                                  fontFamily:'Ubuntu',fontSize: 14,fontWeight: FontWeight.w400,color: AppColors.stockQtyColor),
+                                              itemList[index].itemPrice ?? '',
+                                              style: const TextStyle(fontSize: 15,fontWeight: FontWeight.w700),
                                               textAlign: TextAlign.center, // Center title
                                             ),
                                           ),
@@ -284,7 +383,7 @@ class _AddOrderPageState extends State<AddOrderPage> {
     );
   }
 
-  Widget _buildListView(List<String> itemList) {
+  Widget _buildListView(List<ItemVo> itemList) {
     return ListView.builder(
       itemCount: itemList.length,
       itemBuilder: (context, index) {
@@ -296,14 +395,13 @@ class _AddOrderPageState extends State<AddOrderPage> {
               child: CachedNetworkImage(
                 width: 40,
                 height: 40,
-                imageUrl: 'http://rproplus.asiabrightway.com/storage/Images/6731845646151_tiger.jpg',
+                imageUrl: '$baseUrl/storage/Images/${itemList[index].image}',
                 fit: BoxFit.cover, // Fill the space while maintaining aspect ratio
-                placeholder: (context, url) => const Center(child: CircularProgressIndicator()), // Placeholder
-                errorWidget: (context, url, error) => const Icon(Icons.error, color: Colors.red), // Error handling
+                errorWidget: (context, url, error) => const Icon(Icons.image, color: Colors.grey), // Error handling
               ),
             ),
-            title: const Text('Carlsberg'),
-            subtitle: Text('2400 MMK',style: TextStyle(color: AppColors.colorPrimary,fontSize: 16),),
+            title: Text(itemList[index].itemName ?? ''),
+            subtitle: Text(itemList[index].itemPrice ?? '0',style: TextStyle(color: AppColors.colorPrimary,fontSize: 16)),
             trailing: TextButton(
               onPressed: () {
                 _animateToCart(context, _itemKeys[index]);

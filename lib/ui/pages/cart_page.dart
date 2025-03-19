@@ -56,7 +56,7 @@ class _CartPageState extends State<CartPage> {
                     ),
                     child: TextButton(
                         onPressed:(){
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => SettingPage()));
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingPage()));
                         },
                         child: Text('Place Order',style: TextStyle(color: Colors.white),)),
                   )

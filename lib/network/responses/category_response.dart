@@ -8,7 +8,7 @@ class CategoryResponse{
   @JsonKey(name: 'message')
   final String? message;
 
-  @JsonKey(name: 'data')
+  @JsonKey(name: 'menuCategories')
   final List<CategoryVo> data;
 
   CategoryResponse(this.message, this.data);

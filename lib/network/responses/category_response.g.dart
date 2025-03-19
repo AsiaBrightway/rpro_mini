@@ -9,7 +9,7 @@ part of 'category_response.dart';
 CategoryResponse _$CategoryResponseFromJson(Map<String, dynamic> json) =>
     CategoryResponse(
       json['message'] as String?,
-      (json['data'] as List<dynamic>)
+      (json['menuCategories'] as List<dynamic>)
           .map((e) => CategoryVo.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
@@ -17,5 +17,5 @@ CategoryResponse _$CategoryResponseFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$CategoryResponseToJson(CategoryResponse instance) =>
     <String, dynamic>{
       'message': instance.message,
-      'data': instance.data,
+      'menuCategories': instance.data,
     };

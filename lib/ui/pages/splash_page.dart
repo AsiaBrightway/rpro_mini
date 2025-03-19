@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:rpro_mini/bloc/home_bloc.dart';
 import 'package:rpro_mini/data/models/shoppy_admin_model.dart';
 import 'package:rpro_mini/ui/pages/home_page.dart';
 import 'package:rpro_mini/ui/pages/login_page.dart';
@@ -78,7 +77,7 @@ class _SplashPageState extends State<SplashPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
+                  padding: const EdgeInsets.only(bottom: 8.0,top: 6),
                   child: RichText(
                     textAlign: TextAlign.center,
                     text: const TextSpan(
@@ -86,7 +85,7 @@ class _SplashPageState extends State<SplashPage> {
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                         fontFamily: 'Ubuntu',
-                        color: Colors.grey, // Default color for "Developed by"
+                        color: Colors.grey,
                       ),
                       children: [
                         TextSpan(text: 'Developed by '),

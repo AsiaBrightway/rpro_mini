@@ -3,9 +3,11 @@ import 'package:screenshot/screenshot.dart'; // Ensure you have the `screenshot`
 
 // Define a widget to encapsulate the Screenshot content
 class ScreenshotReceiptWidget extends StatelessWidget {
+  final double listWidth;
+  final double textSize;
   final ScreenshotController screenshotController;
 
-  const ScreenshotReceiptWidget({super.key, required this.screenshotController});
+  const ScreenshotReceiptWidget({super.key, required this.screenshotController, required this.listWidth, required this.textSize});
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +18,7 @@ class ScreenshotReceiptWidget extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
         color: Colors.white,
-        width: 200,
+        width: listWidth,
         child: Column(
           children: [
             const Row(
@@ -110,36 +112,36 @@ class ScreenshotReceiptWidget extends StatelessWidget {
                   physics: const ScrollPhysics(),
                   itemCount: 2,
                   itemBuilder: (context, index) {
-                    return const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
                           flex: 4,
                           child: Text(
                             "Tiger ဘီယာ",
-                            style: TextStyle(fontSize: 8),
+                            style: TextStyle(fontSize: textSize),
                           ),
                         ),
                         Expanded(
                           flex: 2,
                           child: Text(
                             "Cup",
-                            style: TextStyle(fontSize: 8, fontWeight: FontWeight.w400),
+                            style: TextStyle(fontSize: textSize, fontWeight: FontWeight.w400),
                           ),
                         ),
                         Expanded(
                           flex: 2,
                           child: Text(
                             "1",
-                            style: TextStyle(fontSize: 8, fontWeight: FontWeight.w400),
+                            style: TextStyle(fontSize: textSize, fontWeight: FontWeight.w400),
                           ),
                         ),
                         Expanded(
-                          flex: 2,
+                          flex: 4,
                           child: Text(
                             "no sugar",
-                            style: TextStyle(fontSize: 8, fontWeight: FontWeight.w400),
+                            style: TextStyle(fontSize: textSize, fontWeight: FontWeight.w400),
                           ),
                         ),
                       ],

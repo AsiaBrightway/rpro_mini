@@ -5,12 +5,13 @@ import 'package:dio/dio.dart';
 import 'package:rpro_mini/data/vos/floor_vo.dart';
 import 'package:rpro_mini/data/vos/request/color_request_vo.dart';
 import 'package:rpro_mini/data/vos/request/product_request_vo.dart';
-import 'package:rpro_mini/data/vos/table_vo.dart';
 import 'package:rpro_mini/network/data_agents/shoppy_admin_agent.dart';
 import 'package:rpro_mini/network/responses/brand_response.dart';
 import 'package:rpro_mini/network/responses/category_response.dart';
+import 'package:rpro_mini/network/responses/item_response.dart';
 import 'package:rpro_mini/network/responses/login_response.dart';
 import 'package:rpro_mini/network/responses/post_method_response.dart';
+import 'package:rpro_mini/network/responses/table_response.dart';
 import 'package:rpro_mini/network/shoppy_api.dart';
 import '../../data/vos/error_vo.dart';
 import '../../exception/custom_exception.dart';
@@ -150,97 +151,10 @@ class ShoppyAdminAgentImpl extends ShoppyAdminAgent{
   }
 
   @override
-  Future<PostMethodResponse?> addCategory(String token,String name, File? imageFile) async{
-    final Map<String, dynamic> data = {
-      "category_name": name,
-    };
-
-    if (imageFile != null) {
-      data["image"] = await MultipartFile.fromFile(
-        imageFile.path,
-        filename: imageFile.path.split('/').last,
-      );
-    }
-
-    FormData formData = FormData.fromMap(data);
-    try {
-      return await shoppyApi.addCategory(token,formData);
-    } catch (onError) {
-      throw _createException(onError);
-    }
-  }
-
-  @override
-  Future<CategoryResponse?> getCategories(String token,) {
-    return shoppyApi.getCategories(token).catchError((onError){
+  Future<CategoryResponse?> getCategories() {
+    return shoppyApi.getCategories().catchError((onError){
       throw _createException(onError);
     });
-  }
-
-  @override
-  Future<PostMethodResponse?> updateCategoryById(String token,int id, String name, File? imageFile) async{
-    final Map<String, dynamic> data = {
-      "category_name": name,
-    };
-
-    if (imageFile != null) {
-      final bytes = await imageFile.readAsBytes();
-      // Encode the image to base64. Ensure your API can decode this.
-      data["image"] = base64Encode(bytes);
-
-    } else {
-      data["image"] = null;
-    }
-
-    try {
-      return await shoppyApi.updateCategoryById(token,id,data);
-    } catch (onError) {
-      throw _createException(onError);
-    }
-  }
-
-  @override
-  Future<PostMethodResponse?> addSubCategory(String token,int categoryId, String subName, File? imageFile) async{
-    final Map<String, dynamic> data = {
-      "category_id": categoryId,
-      "sub_category_name": subName,
-    };
-
-    if (imageFile != null) {
-      data["image"] = await MultipartFile.fromFile(
-        imageFile.path,
-        filename: imageFile.path.split('/').last,
-      );
-    }
-
-    FormData formData = FormData.fromMap(data);
-    try {
-      return await shoppyApi.addSubCategory(token,formData);
-    } catch (onError) {
-      throw _createException(onError);
-    }
-  }
-
-  @override
-  Future<PostMethodResponse?> updateSubCategoryById(String token,int id, int categoryId, String name, File? image) async{
-    final Map<String, dynamic> data = {
-      "category_id": id,
-      "sub_category_name": name,
-    };
-
-    if (image != null) {
-      final bytes = await image.readAsBytes();
-      // Encode the image to base64. Ensure your API can decode this.
-      data["image"] = base64Encode(bytes);
-    } else {
-      data["image"] = null;
-    }
-
-    try {
-      return await shoppyApi.updateSubCategoryById(token, id,data);
-    } catch (onError) {
-      throw _createException(onError);
-    }
   }
 
   @override
@@ -273,10 +187,23 @@ class ShoppyAdminAgentImpl extends ShoppyAdminAgent{
   }
 
   @override
-  Future<List<TableVo>?> getTablesByFloorId(int floorId) {
+  Future<TableResponse> getTablesByFloorId(int floorId) {
     return shoppyApi.getTableListByFloorId(floorId).catchError((onError){
       throw _createException(onError);
     });
   }
 
+  @override
+  Future<ItemResponse> getItemsByCategoryId(int categoryId) {
+    return shoppyApi.getItemsByCategory(categoryId).catchError((onError){
+      throw _createException(onError.toString());
+    });
+  }
+
+  @override
+  Future<ItemResponse> searchItemByName(String name) {
+    return shoppyApi.searchItemByName(name).catchError((onError){
+      throw _createException(onError.toString());
+    });
+  }
 }

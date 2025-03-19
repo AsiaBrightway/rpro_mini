@@ -1,4 +1,6 @@
 
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -6,7 +8,7 @@ class AuthProvider extends ChangeNotifier{
   String _userName = '';
   String _password = '';
   String _url = '';
-  String _layout = 'grid';
+  String _layout = 'list';
 
   String get layout => _layout;
   String get url => _url;

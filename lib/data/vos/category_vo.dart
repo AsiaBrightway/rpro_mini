@@ -9,21 +9,40 @@ class CategoryVo {
   @JsonKey(name: 'category_id')
   final int categoryId;
 
-  @JsonKey(name: 'category_name')
+  @JsonKey(name: 'menu_category_name')
   final String categoryName;
 
-  @JsonKey(name: 'image')
-  final String? image; // Nullable field
+  @JsonKey(name: 'main_category_id')
+  final int mainCategoryId;
+
+  @JsonKey(name: 'menu_category_image')
+  final String? categoryImage; // Nullable field
+
+  @JsonKey(name: 'store_location_id')
+  final int? storeLocationId;
+
+  @JsonKey(name: 'is_deleted')
+  final int isDeleted;
+
+  @JsonKey(name: 'modified_by')
+  final int? modifiedBy;
 
   @JsonKey(name: 'created_at')
   final String? createdAt;
 
-  CategoryVo({
-    required this.categoryId,
-    required this.categoryName,
-    this.image,
-    required this.createdAt,
-  });
+  @JsonKey(name: 'updated_at')
+  final String? updatedAt;
+
+  CategoryVo(
+      this.categoryId,
+      this.categoryName,
+      this.mainCategoryId,
+      this.categoryImage,
+      this.storeLocationId,
+      this.isDeleted,
+      this.modifiedBy,
+      this.createdAt,
+      this.updatedAt);
 
   factory CategoryVo.fromJson(Map<String, dynamic> json) =>
       _$CategoryVoFromJson(json);
@@ -31,6 +50,6 @@ class CategoryVo {
   Map<String, dynamic> toJson() => _$CategoryVoToJson(this);
 
   String getImageWithBaseUrl(){
-    return kBaseImageUrl + (image ?? "");
+    return kBaseImageUrl + (categoryImage ?? "");
   }
 }

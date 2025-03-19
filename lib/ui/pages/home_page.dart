@@ -39,108 +39,100 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           centerTitle: true,
         ),
         drawer: const UserDrawer(),
-        body: Selector<HomeBloc,List<FloorVo>>(
-            selector: (context,bloc) => bloc.floors,
-            builder: (context,floors,_){
-              var bloc = context.read<HomeBloc>();
-              return  Column(
-                children: [
-                  Selector<HomeBloc,String?>(
-                    selector: (context,bloc) => bloc.selectedFloor,
-                    builder: (context,selectedFloor,_){
-                      return Container(
-                        margin: const EdgeInsets.only(top: 8),
-                        height: 40,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: floors.length,
-                          itemBuilder: (context, index) {
-                            final floor = floors[index];
-                            final isSelected = floor.floorName == selectedFloor;
-                            return GestureDetector(
-                              onTap: () {
-                                bloc.selectedFloor = floors[index].floorName;
-                                bloc.fetchTables(floors[index].floorId); // Update selected day in bloc
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                                margin: const EdgeInsets.symmetric(horizontal: 8),
-                                decoration: BoxDecoration(
-                                  color: isSelected ? AppColors.colorPrimary : Colors.grey[200],
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    floors[index].floorName  ,
-                                    style: TextStyle(
-                                      color: isSelected ? Colors.white : Colors.black,
-                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                  Expanded(
-                      child: Selector<HomeBloc, List<TableVo>>(
-                        selector: (context, bloc) => bloc.tables,
-                        builder: (context, tables, _) {
-                          if (tables.isNotEmpty) {
-                            return Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: GridView.builder(
-                                padding: const EdgeInsets.only(top: 30),
-                                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 4,
-                                  crossAxisSpacing: 8,
-                                  mainAxisSpacing: 8,
-                                  childAspectRatio: 1.1,
-                                ),
-                                itemCount: tables.length,
-                                itemBuilder: (context, index) {
-                                  return TableCard(table: tables[index]);
-                                },
-                              ),
-                            );
-                          } else {
-                            return const Center(
-                                child: Text('Empty Table', style: TextStyle(fontSize: 16)));
-                          }
-                    },
-                  ))
-                ],
-              );
-            }
-        ),
-      ),
-    );
-  }
-}
-
-class TableCard extends StatelessWidget {
-  final TableVo table;
-
-  const TableCard({super.key, required this.table});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 4,
-      child: InkWell(
-        onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => const AddOrderPage()));
-        },
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        body: Column(
           children: [
-            Text(
-              table.tableName,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            Selector<HomeBloc,List<FloorVo>>(
+              selector: (context,bloc) => bloc.floors,
+              builder: (context,floors,_){
+                return Selector<HomeBloc,String?>(
+                  selector: (context,bloc) => bloc.selectedFloor,
+                  builder: (context,selectedFloor,_){
+                    var bloc = context.read<HomeBloc>();
+                    return Container(
+                      margin: const EdgeInsets.only(top: 12,left: 8,right: 8),
+                      height: 40,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: floors.length,
+                        itemBuilder: (context, index) {
+                          final floor = floors[index];
+                          final isSelected = floor.floorName == selectedFloor;
+                          return GestureDetector(
+                            onTap: () {
+                              bloc.selectedFloor = floors[index].floorName;
+                              bloc.fetchTables(floors[index].floorId); // Update selected day in bloc
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                              margin: const EdgeInsets.symmetric(horizontal: 8),
+                              decoration: BoxDecoration(
+                                color: isSelected ? AppColors.colorPrimary : Colors.grey[200],
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  style: TextStyle(
+                                    color: isSelected ? Colors.white : Colors.black,
+                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                  ),
+                                  floors[index].floorName,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                );
+              }
+            ),
+            Selector<HomeBloc,TableState>(
+                selector: (context,bloc) => bloc.tableState,
+                builder: (context,tableState,_){
+                  var bloc = context.read<HomeBloc>();
+                  if(tableState == TableState.error){
+                    return Center(child: Text('Table Error : ${bloc.tableErrorMessage}'));
+                  }
+                  else if(tableState == TableState.success){
+                    return Expanded(
+                        child: Selector<HomeBloc, (List<TableVo>,List<int>)>(
+                          selector: (context, bloc) => (bloc.tables,bloc.occupiedTables),
+                          builder: (context, tables, _) {
+                            if (tables.$1.isNotEmpty) {
+                              return Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: GridView.builder(
+                                  padding: const EdgeInsets.only(top: 30),
+                                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 4,
+                                    crossAxisSpacing: 8,
+                                    mainAxisSpacing: 8,
+                                    childAspectRatio: 1.1,
+                                  ),
+                                  itemCount: tables.$1.length,
+                                  itemBuilder: (context, index) {
+                                    return TableCard(table: tables.$1[index],occupiedTables: tables.$2,reservationTables: bloc.reservationTables);
+                                  },
+                                ),
+                              );
+                            } else {
+                              return const Center(
+                                  child: Text('Empty Table', style: TextStyle(fontSize: 16)));
+                            }
+                          },
+                        ));
+                  }
+                  else{
+                    return SizedBox(
+                      height: 200,
+                      child:
+                        Center(
+                            child: Center(child: CupertinoActivityIndicator(color: AppColors.colorPrimary))
+                        ),
+                    );
+                  }
+                }
             ),
           ],
         ),
@@ -149,3 +141,45 @@ class TableCard extends StatelessWidget {
   }
 }
 
+class TableCard extends StatelessWidget {
+  final TableVo table;
+  final List<int>? reservationTables;
+  final List<int>? occupiedTables;
+  const TableCard({super.key, required this.table,this.occupiedTables, this.reservationTables});
+
+  @override
+  Widget build(BuildContext context) {
+    bool isOccupied = occupiedTables?.contains(table.tableId) ?? false;
+    bool isReservation = reservationTables?.contains(table.tableId) ?? false;
+    return Card(
+      color: (isOccupied)
+          ? Colors.red
+          : (isReservation)
+              ? Colors.orange
+              : Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 4,
+      child: InkWell(
+        onTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => AddOrderPage(tableName: table.tableName)));
+        },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              table.tableName,
+              style: TextStyle(
+                  fontSize: 16, fontWeight: FontWeight.w500,
+                  color : (isOccupied)
+                      ? Colors.white
+                      : (isReservation)
+                        ? Colors.white
+                        : Colors.black,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

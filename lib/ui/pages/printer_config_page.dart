@@ -1,14 +1,13 @@
 import 'dart:async';
-
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 import 'package:provider/provider.dart';
-import 'package:rpro_mini/utils/helper_functions.dart';
+import 'package:rpro_mini/ui/themes/colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../bloc/bluetooth_service.dart';
-import '../themes/colors.dart';
+import '../../data/vos/printer_config.dart';
 
 class PrinterConfigPage extends StatefulWidget {
   const PrinterConfigPage({super.key});
@@ -19,25 +18,21 @@ class PrinterConfigPage extends StatefulWidget {
 
 class _PrinterConfigPageState extends State<PrinterConfigPage> {
   PrinterService? _printerService;
-  final TextEditingController _fontSizeController = TextEditingController();
-  String? _selectedPrinterMac;
+  List<PrinterConfig> printers = [
+    PrinterConfig(id: 1,name: 'Kitchen', type: 'Network', address: '', textSize: 8, width: 200),
+    PrinterConfig(id: 2, name: 'BBQ', type: 'Network', address: '', textSize: 8, width: 200),
+    PrinterConfig(id: 3, name: 'Bar', type: 'Network', address: '', textSize: 8, width: 200),
+    PrinterConfig(id: 4, name: 'Counter', type: 'Network', address: '', textSize: 8, width: 200),
+  ];
 
   @override
   void initState() {
     super.initState();
     requestBluetoothPermissions();
-    _loadConfig();
+    _loadPrinterConfig();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _printerService = context.read<PrinterService>();
       _printerService?.getPairedDevices();
-    });
-  }
-
-  Future<void> _loadConfig() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _fontSizeController.text = prefs.getString('fontSize') ?? '12';
-      _selectedPrinterMac = prefs.getString('printerMac');
     });
   }
 
@@ -68,53 +63,61 @@ class _PrinterConfigPageState extends State<PrinterConfigPage> {
     super.dispose();
   }
 
-  Future<void> _saveConfig() async {
+  Future<void> _savePrinterConfig() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('fontSize', _fontSizeController.text);
-    if (_selectedPrinterMac != null) {
-      await prefs.setString('printerMac', _selectedPrinterMac!);
+    List<String> printerList = printers.map((p) => jsonEncode(p.toJson())).toList();
+    await prefs.setStringList('printer_config', printerList);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Printer configurations saved!")),
+    );
+  }
+
+  // Load saved printer config
+  Future<void> _loadPrinterConfig() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String>? printerList = prefs.getStringList('printer_config');
+
+    if (printerList != null) {
+      setState(() {
+        printers = printerList.map((p) => PrinterConfig.fromJson(jsonDecode(p))).toList();
+      });
     }
-    showSuccessToast(context, 'Saved successfully');
   }
 
   @override
   Widget build(BuildContext context) {
-    var bloc = context.read<PrinterService>();
     return Scaffold(
       appBar: AppBar(title: Text('Printer Configuration')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: ListView.builder(
+        itemCount: printers.length,
+        itemBuilder: (context, index) {
+          return _buildPrinterTile(printers[index], index);
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _savePrinterConfig,
+        child: const Icon(Icons.save,color: Colors.black),
+      ),
+    );
+  }
+
+  Widget _buildPrinterTile(PrinterConfig printer, int index) {
+    return Card(
+      margin: const EdgeInsets.all(8),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Selector<PrinterService,bool?>(
-                selector: (context,bloc) => bloc.isBluetoothEnabled,
-                builder: (context,isEnabled,_) {
-                  if(isEnabled == null){
-                    return const CircularProgressIndicator();
-                  }
-                  else if (!isEnabled){
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text('Enable Bluetooth in your settings'),
-                        TextButton(
-                            onPressed: () => bloc.getPairedDevices(),
-                            child: const Icon(Icons.refresh)),
-                      ],
-                    );
-                  }
-                  else{
-                    return const SizedBox(height: 1);
-                  }
-                }
-            ),
-            Expanded(
+            SizedBox(
+              height: 250,
               child: Selector<PrinterService, List<BluetoothInfo>>(
                 selector: (context, bloc) => bloc.pairedDevices,
                 builder: (context, pairedDevices, _) {
                   return ListView.builder(
                     itemCount: pairedDevices.length,
                     itemBuilder: (context, index) {
+                      var bloc = context.read<PrinterService>();
                       final device = pairedDevices[index];
                       return Card(
                         child: ListTile(
@@ -132,16 +135,9 @@ class _PrinterConfigPageState extends State<PrinterConfigPage> {
                           ),
                           onTap: () {
                             setState(() {
-                              _selectedPrinterMac = device.macAdress;
+                              //todo
+                              device.macAdress;
                             });
-                            // Check if the device is already connected
-                            if (bloc.selectedDeviceMac == device.macAdress && bloc.connected) {
-                              // Disconnect the device if it’s already connected
-                              bloc.disconnectToDevice();
-                            } else {
-                              // Connect to the device if it’s not connected
-                              bloc.connectToDevice(device.macAdress, context);
-                            }
                           },
                         ),
                       );
@@ -150,21 +146,49 @@ class _PrinterConfigPageState extends State<PrinterConfigPage> {
                 },
               ),
             ),
-            TextField(
-              controller: _fontSizeController,
-              decoration: InputDecoration(
-                labelText: 'Font Size',
-              ),
-              keyboardType: TextInputType.number,
-            ),
-            SizedBox(height: 20),
-            // You can build a drop-down or a list view to select a printer.
-            ElevatedButton(
-              onPressed: () async {
-                // Example: simulate selecting a printer MAC address
-                await _saveConfig();
+            Text(printer.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            // Printer Type (Network / Bluetooth)
+            DropdownButton<String>(
+              value: printer.type,
+              focusColor: AppColors.colorPrimary,
+              borderRadius: BorderRadius.circular(12),
+              onChanged: (value) {
+                setState(() {
+                  printers[index].type = value!;
+                });
               },
-              child: Text('Select Printer & Save'),
+              items: ['Network', 'Bluetooth']
+                  .map((type) => DropdownMenuItem(value: type, child: Text(type)))
+                  .toList(),
+            ),
+            // Printer Address Input
+            TextField(
+              decoration: const InputDecoration(labelText: 'Address (IP or MAC)',labelStyle: TextStyle(color: Colors.grey)),
+              onChanged: (value) {
+                printers[index].address = value;
+              },
+              controller: TextEditingController(text: printer.address),
+            ),
+            const SizedBox(height: 8),
+            // Text Size Input
+            TextField(
+              decoration: const InputDecoration(labelText: 'Text Size',labelStyle: TextStyle(color: Colors.grey)),
+              keyboardType: TextInputType.number,
+              onChanged: (value) {
+                printers[index].textSize = int.tryParse(value) ?? 12;
+              },
+              controller: TextEditingController(text: printer.textSize.toString()),
+            ),
+            const SizedBox(height: 8),
+            // Width Input
+            TextField(
+              decoration: InputDecoration(labelText: 'Width',labelStyle: TextStyle(color: Colors.grey)),
+              keyboardType: TextInputType.number,
+              onChanged: (value) {
+                printers[index].width = int.tryParse(value) ?? 80;
+              },
+              controller: TextEditingController(text: printer.width.toString()),
             ),
           ],
         ),

@@ -1,9 +1,7 @@
 // printer_service.dart
 
 import 'package:flutter/material.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
-import 'package:rpro_mini/utils/helper_functions.dart';
 
 class PrinterService extends ChangeNotifier {
   List<BluetoothInfo> pairedDevices = [];
@@ -12,7 +10,6 @@ class PrinterService extends ChangeNotifier {
   bool _connected = false;
   String? _selectedDeviceMac;
   bool? _isBluetoothEnabled;
-
 
   bool get connected => _connected;
 

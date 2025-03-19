@@ -11,10 +11,10 @@ class FloorVo{
   final String floorName;
 
   @JsonKey(name: 'other_name')
-  final String otherName;
+  final String? otherName;
 
   @JsonKey(name: 'floor_code')
-  final String floorCode;
+  final String? floorCode;
 
   @JsonKey(name: 'is_discontinued')
   final int isDiscontinued;
@@ -26,16 +26,16 @@ class FloorVo{
   final int locationId;
 
   @JsonKey(name: 'is_updated')
-  final int isUpdated;
+  final int? isUpdated;
 
   @JsonKey(name: 'modified_by')
-  final int modifiedBy;
+  final int? modifiedBy;
 
   @JsonKey(name: 'created_at')
-  final String createdAt;
+  final String? createdAt;
 
   @JsonKey(name: 'updated_at')
-  final String updatedAt;
+  final String? updatedAt;
 
   FloorVo(
       this.floorId,

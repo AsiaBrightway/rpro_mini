@@ -1,13 +1,14 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:retrofit/http.dart';
 import 'package:rpro_mini/data/vos/floor_vo.dart';
-import 'package:rpro_mini/data/vos/table_vo.dart';
+import 'package:rpro_mini/data/vos/item_vo.dart';
 import 'package:rpro_mini/network/responses/brand_response.dart';
 import 'package:rpro_mini/network/responses/category_response.dart';
+import 'package:rpro_mini/network/responses/item_response.dart';
 import 'package:rpro_mini/network/responses/login_response.dart';
 import 'package:rpro_mini/network/responses/parse_error_logger.dart';
 import 'package:rpro_mini/network/responses/post_method_response.dart';
+import 'package:rpro_mini/network/responses/table_response.dart';
 import '../data/vos/request/color_request_vo.dart';
 import '../data/vos/request/product_request_vo.dart';
 import 'api_constants.dart';
@@ -50,35 +51,8 @@ abstract class ShoppyApi{
       @Body() Map<String, dynamic> body,
       );
 
-  @POST(kEndPointCategories)
-  @MultiPart()
-  Future<PostMethodResponse?> addCategory(
-      @Header(kParamAuthorization) String apiKey,
-      @Body() FormData formData
-      );
-
-  @GET(kEndPointCategories)
-  Future<CategoryResponse?> getCategories(@Header(kParamAuthorization) String apiKey,);
-
-  @PUT("$kEndPointCategories/{id}")
-  Future<PostMethodResponse?> updateCategoryById(
-      @Header(kParamAuthorization) String apiKey,
-      @Path("id") int id,
-      @Body() Map<String, dynamic> body,
-      );
-
-  @POST(kEndPointSubCategories)
-  Future<PostMethodResponse?> addSubCategory(
-      @Header(kParamAuthorization) String apiKey,
-      @Body() FormData formData
-      );
-
-  @PUT("$kEndPointSubCategories/{id}")
-  Future<PostMethodResponse?> updateSubCategoryById(
-      @Header(kParamAuthorization) String apiKey,
-      @Path("id") int id,
-      @Body() Map<String, dynamic> body,
-      );
+  @GET(kEndPointCategory)
+  Future<CategoryResponse?> getCategories();
 
   @POST(kEndPointProducts)
   Future<PostMethodResponse?> addNewProduct(
@@ -103,7 +77,17 @@ abstract class ShoppyApi{
   Future<List<FloorVo>> getFloorList();
 
   @GET("$kEndPointTables/{id}")
-  Future<List<TableVo>> getTableListByFloorId(
+  Future<TableResponse> getTableListByFloorId(
       @Path("id") int id,
+      );
+
+  @GET("$kEndPointItem/{id}")
+  Future<ItemResponse> getItemsByCategory(
+      @Path("id") int id,
+      );
+
+  @GET("$kEndPointSearchName/{name}")
+  Future<ItemResponse> searchItemByName(
+      @Path("name") String id,
       );
 }
