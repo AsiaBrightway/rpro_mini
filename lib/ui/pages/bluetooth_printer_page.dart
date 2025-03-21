@@ -45,9 +45,9 @@ class _BluetoothPrinterPageState extends State<BluetoothPrinterPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Center(
-              child: ScreenshotReceiptWidget(screenshotController: screenshotController, listWidth: 260,textSize: 14),
-            ),
+            // Center(
+            //   child: ScreenshotReceiptWidget(screenshotController: screenshotController, listWidth: 260,textSize: 14),
+            // ),
             const SizedBox(height: 8),
             ElevatedButton.icon(
               onPressed: (){

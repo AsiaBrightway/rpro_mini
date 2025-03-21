@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:rpro_mini/data/vos/item_vo.dart';
 import 'package:screenshot/screenshot.dart'; // Ensure you have the `screenshot` package installed
 
 // Define a widget to encapsulate the Screenshot content
 class ScreenshotReceiptWidget extends StatelessWidget {
+  final List<ItemVo> items;
+  final String? printerLocation;
   final double listWidth;
   final double textSize;
   final ScreenshotController screenshotController;
 
-  const ScreenshotReceiptWidget({super.key, required this.screenshotController, required this.listWidth, required this.textSize});
+  const ScreenshotReceiptWidget({super.key, required this.screenshotController, required this.listWidth, required this.textSize, required this.items, this.printerLocation});
 
   @override
   Widget build(BuildContext context) {
+    String formattedDateTime = DateFormat('yyyy-MM-dd h:mm:ss a').format(DateTime.now());
     return Container(
       decoration: BoxDecoration(
           border: Border.all(color: Colors.black45,width: 0.5)
@@ -30,17 +35,17 @@ class ScreenshotReceiptWidget extends StatelessWidget {
                 ),
               ],
             ),
-            const Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Padding(
-                  padding: EdgeInsets.only(bottom: 8, top: 8),
+                  padding: const EdgeInsets.only(bottom: 8, top: 8),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        '(Bar and Refrigerator Orders)',
-                        style: TextStyle(
+                        '($printerLocation Orders)',
+                        style: const TextStyle(
                             fontSize: 8, fontWeight: FontWeight.w600),
                       ),
                     ],
@@ -48,10 +53,9 @@ class ScreenshotReceiptWidget extends StatelessWidget {
                 ),
               ],
             ),
-            const Row(
+            Row(
               children: [
-                Text('2025-02-20, ', style: TextStyle(fontSize: 9)),
-                Text('2:49 PM ', style: TextStyle(fontSize: 9)),
+                Text(formattedDateTime, style: const TextStyle(fontSize: 9)),
                 Text('(700)', style: TextStyle(fontSize: 9))
               ],
             ),
@@ -68,7 +72,7 @@ class ScreenshotReceiptWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  flex: 3,
+                  flex: 4,
                   child: Text(
                     "Name",
                     style: TextStyle(fontSize: 8, fontFamily: 'Ubuntu'),
@@ -110,16 +114,17 @@ class ScreenshotReceiptWidget extends StatelessWidget {
                   shrinkWrap: true,
                   padding: const EdgeInsets.only(bottom: 8,top: 4),
                   physics: const ScrollPhysics(),
-                  itemCount: 2,
+                  itemCount: items.length,
                   itemBuilder: (context, index) {
                     return Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
-                          flex: 4,
+                          flex: 5,
                           child: Text(
-                            "Tiger ဘီယာ",
+                            maxLines: 2,
+                            items[index].itemName ?? '_',
                             style: TextStyle(fontSize: textSize),
                           ),
                         ),

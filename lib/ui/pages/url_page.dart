@@ -33,14 +33,17 @@ class _UrlPageState extends State<UrlPage> {
     }
 
     final authModel = Provider.of<AuthProvider>(context,listen: false);
-    authModel.saveUrl(_urlController.text);
-    showSuccessToast(context, 'Url saved Successfully');
-
     // Update the baseUrl in ShoppyAdminAgentImpl
-    shoppyAdminAgent.updateBaseUrl(_urlController.text);
+    try{
+      shoppyAdminAgent.updateBaseUrl(_urlController.text);
+      authModel.saveUrl(_urlController.text);
+      showSuccessToast(context, 'Url saved Successfully');
+      await Future.delayed(const Duration(milliseconds: 300));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginPage()));
+    }catch(e){
+      showAlertDialogBox(context, 'Url Error', e.toString());
+    }
 
-    // Navigate to the login screen
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage()));
   }
 
   @override

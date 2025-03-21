@@ -6,6 +6,7 @@ import 'package:rpro_mini/data/vos/floor_vo.dart';
 import 'package:rpro_mini/data/vos/table_vo.dart';
 import 'package:rpro_mini/ui/components/user_drawer.dart';
 import 'package:rpro_mini/ui/pages/add_order_page.dart';
+import 'package:rpro_mini/ui/pages/setting_page.dart';
 import 'package:rpro_mini/ui/themes/colors.dart';
 
 class HomePage extends StatefulWidget {
@@ -41,6 +42,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         drawer: const UserDrawer(),
         body: Column(
           children: [
+            ElevatedButton(onPressed: (){
+              Navigator.push(context, MaterialPageRoute(builder: (context) => SettingPage()));
+            },
+                child: Text('Go To Print')),
             Selector<HomeBloc,List<FloorVo>>(
               selector: (context,bloc) => bloc.floors,
               builder: (context,floors,_){

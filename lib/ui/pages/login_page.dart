@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:rpro_mini/data/models/shoppy_admin_model.dart';
 import 'package:rpro_mini/ui/pages/home_page.dart';
-import 'package:rpro_mini/ui/pages/splash_page.dart';
 import 'package:rpro_mini/utils/helper_functions.dart';
 import '../../bloc/auth_provider.dart';
 import '../themes/colors.dart';

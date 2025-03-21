@@ -24,6 +24,10 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
+    Future.delayed(Duration.zero, () {
+      precacheImage(const AssetImage('assets/rpro_logo.webp'), context);
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkLoginStatus();
     });
@@ -102,7 +106,6 @@ class _SplashPageState extends State<SplashPage> {
           ),
         ],
       ),
-
     );
   }
 }

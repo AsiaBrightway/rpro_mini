@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 import 'package:provider/provider.dart';
@@ -72,6 +73,10 @@ class _PrinterConfigPageState extends State<PrinterConfigPage> {
     );
   }
 
+  void _onBackPressed(){
+    Navigator.of(context).pop();
+  }
+
   // Load saved printer config
   Future<void> _loadPrinterConfig() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -87,12 +92,46 @@ class _PrinterConfigPageState extends State<PrinterConfigPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Printer Configuration')),
-      body: ListView.builder(
-        itemCount: printers.length,
-        itemBuilder: (context, index) {
-          return _buildPrinterTile(printers[index], index);
-        },
+      appBar: AppBar(
+          backgroundColor: AppColors.colorPrimary,
+          automaticallyImplyLeading: false,
+          leading: IconButton(
+            onPressed: _onBackPressed,
+            icon: const Icon(Icons.arrow_back_ios,color: Colors.white),
+          ),
+          centerTitle: true,
+          title: const Text('Printer Configuration',style: TextStyle(color: Colors.white,fontFamily: 'Ubuntu'))
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Selector<PrinterService, List<BluetoothInfo>>(
+              selector: (context, bloc) => bloc.pairedDevices,
+              builder: (context, pairedDevices, _) {
+                if(pairedDevices.isNotEmpty){
+                  return ElevatedButton(
+                      onPressed: (){
+                        _showPairedDevicesBottomSheet(context, context.read<PrinterService>());
+                      },
+                      child: const Text('Bluetooth Printer'));
+                }else{
+                  return TextButton(
+                      onPressed: (){},
+                      child: const Text('Not found paired devices'));
+                }
+              },
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: printers.length,
+              itemBuilder: (context, index) {
+                return _buildPrinterTile(printers[index], index);
+              },
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _savePrinterConfig,
@@ -109,50 +148,12 @@ class _PrinterConfigPageState extends State<PrinterConfigPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              height: 250,
-              child: Selector<PrinterService, List<BluetoothInfo>>(
-                selector: (context, bloc) => bloc.pairedDevices,
-                builder: (context, pairedDevices, _) {
-                  return ListView.builder(
-                    itemCount: pairedDevices.length,
-                    itemBuilder: (context, index) {
-                      var bloc = context.read<PrinterService>();
-                      final device = pairedDevices[index];
-                      return Card(
-                        child: ListTile(
-                          title: Text(device.name,style: TextStyle(color: AppColors.colorPrimary)),
-                          subtitle: Text(device.macAdress,style: const TextStyle(color: Colors.black)),
-                          trailing: Selector<PrinterService, bool>(
-                            selector: (context, bloc) => bloc.connected,
-                            builder: (context, isConnected, _) {
-                              if (bloc.selectedDeviceMac == device.macAdress && isConnected) {
-                                return const Icon(Icons.check_circle, color: Colors.green);
-                              } else {
-                                return const SizedBox(width: 1);
-                              }
-                            },
-                          ),
-                          onTap: () {
-                            setState(() {
-                              //todo
-                              device.macAdress;
-                            });
-                          },
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
             Text(printer.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             // Printer Type (Network / Bluetooth)
             DropdownButton<String>(
               value: printer.type,
               focusColor: AppColors.colorPrimary,
-              borderRadius: BorderRadius.circular(12),
               onChanged: (value) {
                 setState(() {
                   printers[index].type = value!;
@@ -183,7 +184,7 @@ class _PrinterConfigPageState extends State<PrinterConfigPage> {
             const SizedBox(height: 8),
             // Width Input
             TextField(
-              decoration: InputDecoration(labelText: 'Width',labelStyle: TextStyle(color: Colors.grey)),
+              decoration: const InputDecoration(labelText: 'Width',labelStyle: TextStyle(color: Colors.grey)),
               keyboardType: TextInputType.number,
               onChanged: (value) {
                 printers[index].width = int.tryParse(value) ?? 80;
@@ -193,6 +194,49 @@ class _PrinterConfigPageState extends State<PrinterConfigPage> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showPairedDevicesBottomSheet(BuildContext context, PrinterService printerService) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(16),
+          height: 300,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text("Select a Printer", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 10),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: printerService.pairedDevices.length,
+                  padding: const EdgeInsets.only(bottom: 48),
+                  itemBuilder: (context, index) {
+                    final device = printerService.pairedDevices[index];
+                    return Card(
+                      child: ListTile(
+                        title: Text(device.name, style: TextStyle(color: AppColors.colorPrimary)),
+                        subtitle: Text(device.macAdress, style: const TextStyle(color: Colors.black)),
+                        onTap: () {
+                          // Copy to clipboard
+                          Clipboard.setData(ClipboardData(text: device.macAdress));
+
+                          Navigator.pop(context);
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

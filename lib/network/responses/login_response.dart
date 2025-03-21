@@ -1,7 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
 
-import '../../data/vos/admin_vo.dart';
-
 part 'login_response.g.dart';
 
 @JsonSerializable()
