@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:rpro_mini/data/vos/order_details_vo.dart';
 import '../themes/colors.dart';
 
 class ItemCart extends StatefulWidget {
-  final int index;
-  const ItemCart({super.key, required this.index});
+  final OrderDetailsVo orderDetails;
+  const ItemCart({super.key, required this.orderDetails,});
 
   @override
   State<ItemCart> createState() => _ItemCartState();
@@ -14,11 +15,6 @@ class _ItemCartState extends State<ItemCart> with SingleTickerProviderStateMixin
   @override
   void initState() {
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   @override
@@ -44,11 +40,11 @@ class _ItemCartState extends State<ItemCart> with SingleTickerProviderStateMixin
         children: [
           Row(
             children: [
-              const Padding(
-                padding: EdgeInsets.only(left: 16),
+              Padding(
+                padding: const EdgeInsets.only(left: 16),
                 child: Text(
-                  '1',
-                  style: TextStyle(
+                  widget.orderDetails.quantity.toString(),
+                  style: const TextStyle(
                     fontFamily: 'Ubuntu',
                     fontSize: 16,
                     color: Colors.white,
@@ -67,14 +63,14 @@ class _ItemCartState extends State<ItemCart> with SingleTickerProviderStateMixin
                 ),
               ),
               // Title column
-              const Column(
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Padding(
                     padding: EdgeInsets.only(left: 10),
                     child: Text(
-                      'Lipstick',
+                      'Empty Name',
                       style: TextStyle(
                         fontFamily: 'Ubuntu',
                         color: Colors.white,
@@ -97,8 +93,8 @@ class _ItemCartState extends State<ItemCart> with SingleTickerProviderStateMixin
                   Padding(
                     padding: EdgeInsets.only(left: 10, bottom: 4),
                     child: Text(
-                      '16000 MMK',
-                      style: TextStyle(
+                      widget.orderDetails.itemPrice,
+                      style: const TextStyle(
                         fontFamily: 'Ubuntu',
                         fontWeight: FontWeight.w500,
                         fontSize: 15,

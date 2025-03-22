@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'dart:ui';
 import 'package:image/image.dart' as img;
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -24,8 +23,8 @@ void showSuccessScaffoldMessage(context,String name){
     ),
     duration: const Duration(milliseconds: 1700),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-    margin: EdgeInsets.only(
-      bottom: MediaQuery.of(context).size.height - 170,
+    margin: const EdgeInsets.only(
+      bottom: 16,
       left: 16,
       right: 16,
     ),
@@ -69,8 +68,8 @@ void showAlertDialogBox(BuildContext context,String title, String message) {
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text(title),
-        content: Text(message),
+        title: Text(title,style: const TextStyle(color: Colors.black87)),
+        content: Text(message,style: const TextStyle(color: Colors.black87)),
         actions: [
           Container(
             width: double.infinity,
@@ -127,8 +126,8 @@ void showDialogBox({
     barrierDismissible: false, // Prevent closing when tapping outside
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text(title),
-        content: Text(message),
+        title: Text(title,style: const TextStyle(color: Colors.black87),),
+        content: Text(message,style: const TextStyle(color: Colors.black87),),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(), // Close dialog

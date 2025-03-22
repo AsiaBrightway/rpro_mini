@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
 import 'package:provider/provider.dart' as provider;
-import 'package:rpro_mini/bloc/home_bloc.dart';
 import 'package:rpro_mini/ui/pages/home_page.dart';
-import 'package:rpro_mini/ui/pages/login_page.dart';
-import 'package:rpro_mini/ui/pages/setting_page.dart';
-import 'package:rpro_mini/ui/themes/dark_mode.dart';
-import 'package:rpro_mini/ui/themes/light_mode.dart';
+import 'package:rpro_mini/ui/pages/splash_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'bloc/auth_provider.dart';
 import 'bloc/bluetooth_service.dart';
+import 'bloc/home_bloc.dart';
 import 'network/data_agents/shoppy_admin_agent_impl.dart';
+import 'ui/pages/login_page.dart';
+import 'ui/themes/dark_mode.dart';
+import 'ui/themes/light_mode.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: lightMode,
       darkTheme: darkMode,
-      home: const HomePage(),
+      home: const SplashPage(),
         routes: {
           '/login': (context) => const LoginPage(),
         }

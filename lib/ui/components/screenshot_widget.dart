@@ -31,7 +31,7 @@ class ScreenshotReceiptWidget extends StatelessWidget {
               children: [
                 Text(
                   "INNOCENT",
-                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: Colors.black,fontSize: 10, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -46,6 +46,7 @@ class ScreenshotReceiptWidget extends StatelessWidget {
                       Text(
                         '($printerLocation Orders)',
                         style: const TextStyle(
+                          color: Colors.black,
                             fontSize: 8, fontWeight: FontWeight.w600),
                       ),
                     ],
@@ -55,15 +56,18 @@ class ScreenshotReceiptWidget extends StatelessWidget {
             ),
             Row(
               children: [
-                Text(formattedDateTime, style: const TextStyle(fontSize: 9)),
-                Text('(700)', style: TextStyle(fontSize: 9))
+                Text(formattedDateTime, style: const TextStyle(fontSize: 9,color: Colors.black)),
+                Text(
+                    '(700)',
+                    style: TextStyle(fontSize: 9,color: Colors.black)
+                )
               ],
             ),
             const Row(
               children: [
-                Text('G-Floor, ', style: TextStyle(fontSize: 9)),
-                Text('B4, ', style: TextStyle(fontSize: 9)),
-                Text('1', style: TextStyle(fontSize: 9))
+                Text('G-Floor, ', style: TextStyle(fontSize: 9,color: Colors.black)),
+                Text('B4, ', style: TextStyle(fontSize: 9,color: Colors.black)),
+                Text('1', style: TextStyle(fontSize: 9,color: Colors.black))
               ],
             ),
             const SizedBox(height: 4),
@@ -75,7 +79,7 @@ class ScreenshotReceiptWidget extends StatelessWidget {
                   flex: 4,
                   child: Text(
                     "Name",
-                    style: TextStyle(fontSize: 8, fontFamily: 'Ubuntu'),
+                    style: TextStyle(fontSize: 8, fontFamily: 'Ubuntu',color: Colors.black),
                   ),
                 ),
                 Expanded(
@@ -83,7 +87,7 @@ class ScreenshotReceiptWidget extends StatelessWidget {
                   child: Text(
                     "Unit",
                     style: TextStyle(
-                        fontSize: 8, fontWeight: FontWeight.w400, fontFamily: 'Ubuntu'),
+                        fontSize: 8, fontWeight: FontWeight.w400, fontFamily: 'Ubuntu',color: Colors.black),
                   ),
                 ),
                 Expanded(
@@ -91,7 +95,7 @@ class ScreenshotReceiptWidget extends StatelessWidget {
                   child: Text(
                     "Qty",
                     style: TextStyle(
-                        fontSize: 8, fontWeight: FontWeight.w400, fontFamily: 'Ubuntu'),
+                        fontSize: 8, fontWeight: FontWeight.w400, fontFamily: 'Ubuntu',color: Colors.black),
                   ),
                 ),
                 Expanded(
@@ -99,7 +103,7 @@ class ScreenshotReceiptWidget extends StatelessWidget {
                   child: Text(
                     "Remark",
                     style: TextStyle(
-                        fontSize: 8, fontWeight: FontWeight.w400, fontFamily: 'Ubuntu'),
+                        fontSize: 8, fontWeight: FontWeight.w400, fontFamily: 'Ubuntu',color: Colors.black),
                   ),
                 ),
               ],
@@ -125,28 +129,28 @@ class ScreenshotReceiptWidget extends StatelessWidget {
                           child: Text(
                             maxLines: 2,
                             items[index].itemName ?? '_',
-                            style: TextStyle(fontSize: textSize),
+                            style: TextStyle(fontSize: textSize,color: Colors.black),
                           ),
                         ),
                         Expanded(
                           flex: 2,
                           child: Text(
                             "Cup",
-                            style: TextStyle(fontSize: textSize, fontWeight: FontWeight.w400),
+                            style: TextStyle(fontSize: textSize, fontWeight: FontWeight.w400,color: Colors.black),
                           ),
                         ),
                         Expanded(
                           flex: 2,
                           child: Text(
                             "1",
-                            style: TextStyle(fontSize: textSize, fontWeight: FontWeight.w400),
+                            style: TextStyle(fontSize: textSize, fontWeight: FontWeight.w400,color: Colors.black),
                           ),
                         ),
                         Expanded(
                           flex: 4,
                           child: Text(
                             "no sugar",
-                            style: TextStyle(fontSize: textSize, fontWeight: FontWeight.w400),
+                            style: TextStyle(fontSize: textSize, fontWeight: FontWeight.w400,color: Colors.black),
                           ),
                         ),
                       ],

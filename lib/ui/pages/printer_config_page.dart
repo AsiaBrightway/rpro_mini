@@ -6,6 +6,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 import 'package:provider/provider.dart';
 import 'package:rpro_mini/ui/themes/colors.dart';
+import 'package:rpro_mini/utils/helper_functions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../bloc/bluetooth_service.dart';
 import '../../data/vos/printer_config.dart';
@@ -68,9 +69,7 @@ class _PrinterConfigPageState extends State<PrinterConfigPage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> printerList = printers.map((p) => jsonEncode(p.toJson())).toList();
     await prefs.setStringList('printer_config', printerList);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Printer configurations saved!")),
-    );
+    showSuccessScaffoldMessage(context, 'Printer configuration saved');
   }
 
   void _onBackPressed(){
@@ -92,6 +91,7 @@ class _PrinterConfigPageState extends State<PrinterConfigPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
       appBar: AppBar(
           backgroundColor: AppColors.colorPrimary,
           automaticallyImplyLeading: false,
@@ -99,32 +99,31 @@ class _PrinterConfigPageState extends State<PrinterConfigPage> {
             onPressed: _onBackPressed,
             icon: const Icon(Icons.arrow_back_ios,color: Colors.white),
           ),
-          centerTitle: true,
-          title: const Text('Printer Configuration',style: TextStyle(color: Colors.white,fontFamily: 'Ubuntu'))
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Selector<PrinterService, List<BluetoothInfo>>(
+          actions: [
+            Selector<PrinterService, List<BluetoothInfo>>(
               selector: (context, bloc) => bloc.pairedDevices,
               builder: (context, pairedDevices, _) {
                 if(pairedDevices.isNotEmpty){
-                  return ElevatedButton(
+                  return TextButton(
                       onPressed: (){
                         _showPairedDevicesBottomSheet(context, context.read<PrinterService>());
                       },
-                      child: const Text('Bluetooth Printer'));
+                      child: const Text('Copy',style: TextStyle(color: Colors.white),));
                 }else{
                   return TextButton(
                       onPressed: (){},
-                      child: const Text('Not found paired devices'));
+                      child: const Text('Not found'));
                 }
               },
-            ),
-          ),
+            )
+          ],
+          title: const Text('Printer Configuration',style: TextStyle(color: Colors.white,fontFamily: 'Ubuntu',fontSize: 16))
+      ),
+      body: Column(
+        children: [
           Expanded(
             child: ListView.builder(
+              padding: const EdgeInsets.only(top: 8),
               itemCount: printers.length,
               itemBuilder: (context, index) {
                 return _buildPrinterTile(printers[index], index);
@@ -134,14 +133,16 @@ class _PrinterConfigPageState extends State<PrinterConfigPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.colorNavBackground,
         onPressed: _savePrinterConfig,
-        child: const Icon(Icons.save,color: Colors.black),
+        child: Icon(Icons.save,color: Theme.of(context).colorScheme.secondary),
       ),
     );
   }
 
   Widget _buildPrinterTile(PrinterConfig printer, int index) {
     return Card(
+      color: Theme.of(context).colorScheme.primaryContainer,
       margin: const EdgeInsets.all(8),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -154,6 +155,8 @@ class _PrinterConfigPageState extends State<PrinterConfigPage> {
             DropdownButton<String>(
               value: printer.type,
               focusColor: AppColors.colorPrimary,
+              borderRadius: BorderRadius.circular(8),
+              dropdownColor: Theme.of(context).colorScheme.onPrimaryContainer,
               onChanged: (value) {
                 setState(() {
                   printers[index].type = value!;
@@ -210,7 +213,7 @@ class _PrinterConfigPageState extends State<PrinterConfigPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text("Select a Printer", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text("Select a Printer", style: TextStyle(color: Colors.black87,fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 10),
               Expanded(
                 child: ListView.builder(

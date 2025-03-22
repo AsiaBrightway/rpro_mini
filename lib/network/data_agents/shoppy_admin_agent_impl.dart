@@ -10,13 +10,15 @@ import 'package:rpro_mini/network/responses/brand_response.dart';
 import 'package:rpro_mini/network/responses/category_response.dart';
 import 'package:rpro_mini/network/responses/item_response.dart';
 import 'package:rpro_mini/network/responses/login_response.dart';
+import 'package:rpro_mini/network/responses/order_details_response.dart';
 import 'package:rpro_mini/network/responses/post_method_response.dart';
 import 'package:rpro_mini/network/responses/table_response.dart';
 import 'package:rpro_mini/network/shoppy_api.dart';
 import '../../data/vos/error_vo.dart';
 import '../../exception/custom_exception.dart';
 
-class ShoppyAdminAgentImpl extends ShoppyAdminAgent{
+class
+ShoppyAdminAgentImpl extends ShoppyAdminAgent{
   late Dio dio;
   late ShoppyApi shoppyApi;
 
@@ -203,6 +205,13 @@ class ShoppyAdminAgentImpl extends ShoppyAdminAgent{
   @override
   Future<ItemResponse> searchItemByName(String name) {
     return shoppyApi.searchItemByName(name).catchError((onError){
+      throw _createException(onError.toString());
+    });
+  }
+
+  @override
+  Future<OrderDetailsResponse> getOrderDetailsByTable(int tableId, int tableOrderValue) {
+    return shoppyApi.getOrderDetailsByTable(tableId, tableOrderValue).catchError((onError){
       throw _createException(onError.toString());
     });
   }

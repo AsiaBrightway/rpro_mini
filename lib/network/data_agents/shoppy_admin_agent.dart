@@ -9,6 +9,7 @@ import 'package:rpro_mini/network/responses/table_response.dart';
 import '../responses/brand_response.dart';
 import '../responses/category_response.dart';
 import '../responses/login_response.dart';
+import '../responses/order_details_response.dart';
 import '../responses/post_method_response.dart';
 
 abstract class ShoppyAdminAgent{
@@ -36,4 +37,6 @@ abstract class ShoppyAdminAgent{
   Future<ItemResponse> getItemsByCategoryId(int categoryId);
 
   Future<ItemResponse> searchItemByName(String name);
+
+  Future<OrderDetailsResponse> getOrderDetailsByTable(int tableId,int tableOrderValue);
 }

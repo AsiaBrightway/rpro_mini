@@ -10,6 +10,9 @@ enum ItemState { initial, loading, success, error }
 
 class AddOrderBloc extends ChangeNotifier{
 
+  /// true is success,
+  /// false is fail,
+  /// null is loading
   bool _isSearching = false;
   ItemState _itemState = ItemState.initial;
   List<CategoryVo> categories = [];

@@ -46,6 +46,7 @@ class _UserDrawerState extends State<UserDrawer> {
   @override
   Widget build(BuildContext context) {
     return Drawer(
+      backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
       child: SingleChildScrollView(
         child: Column(
           children: [
@@ -56,7 +57,7 @@ class _UserDrawerState extends State<UserDrawer> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: ListTile(
-                leading: const Icon(Icons.print,color: Colors.black87),
+                leading: Icon(Icons.print,color: Theme.of(context).colorScheme.onSurface),
                 title: const Text('Printer Config',style: TextStyle(fontWeight: FontWeight.w500),),
                 onTap: (){
                   _navigateToConfigPage(context);

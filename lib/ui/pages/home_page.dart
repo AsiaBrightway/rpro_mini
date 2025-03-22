@@ -30,6 +30,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     return ChangeNotifierProvider(
       create: (context) => HomeBloc(),
       child: Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
         appBar: AppBar(
           toolbarHeight: 80,
           iconTheme: const IconThemeData(

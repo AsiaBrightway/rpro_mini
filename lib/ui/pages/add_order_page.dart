@@ -6,13 +6,15 @@ import 'package:rpro_mini/bloc/add_order_bloc.dart';
 import 'package:rpro_mini/bloc/auth_provider.dart';
 import 'package:rpro_mini/data/vos/category_vo.dart';
 import 'package:rpro_mini/data/vos/item_vo.dart';
+import 'package:rpro_mini/ui/components/cached_category_image.dart';
 import 'package:rpro_mini/ui/components/flying_animation.dart';
 import 'package:rpro_mini/ui/pages/cart_page.dart';
 import 'package:rpro_mini/ui/themes/colors.dart';
 
 class AddOrderPage extends StatefulWidget {
   final String? tableName;
-  const AddOrderPage({super.key, this.tableName});
+  final int? tableId;
+  const AddOrderPage({super.key, this.tableName, this.tableId});
 
   @override
   State<AddOrderPage> createState() => _AddOrderPageState();
@@ -184,20 +186,8 @@ class _AddOrderPageState extends State<AddOrderPage> {
                                           height: 100,
                                           child: ClipRRect(
                                             borderRadius: BorderRadius.circular(16),
-                                            child: CachedNetworkImage(
-                                              imageUrl: '$baseUrl/storage/Images/${data.$1[index].categoryImage}',
-                                              width: 100,
-                                              height: 100,
-                                              fit: BoxFit.cover,
-                                              placeholder: (context, url) => Center(
-                                                child: CupertinoActivityIndicator(
-                                                  color: AppColors.colorPrimary,
-                                                ),
-                                              ),
-                                              errorWidget: (context, url, error) => const Icon(
-                                                Icons.error,
-                                                color: Colors.grey,
-                                              ),
+                                            child: CachedCategoryImage(
+                                                imageUrl: '$baseUrl/Storage/Images/${data.$1[index].categoryImage}'
                                             ),
                                           ),
                                         ),
@@ -334,7 +324,10 @@ class _AddOrderPageState extends State<AddOrderPage> {
                                                 imageUrl: '$baseUrl/storage/Images/${itemList[index].image}',
                                                 width: double.infinity,
                                                 fit: BoxFit.cover,
-                                                errorWidget: (context, url, error) => const Icon(Icons.image, color: Colors.grey),
+                                                errorWidget: (context, url, error) =>
+                                                    Expanded(
+                                                        child: Image.asset('assets/placeholder_image.jpg')
+                                                    ),
                                               ),
                                             ),
                                           ),

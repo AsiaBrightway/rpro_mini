@@ -5,6 +5,7 @@ import 'package:rpro_mini/network/responses/brand_response.dart';
 import 'package:rpro_mini/network/responses/category_response.dart';
 import 'package:rpro_mini/network/responses/item_response.dart';
 import 'package:rpro_mini/network/responses/login_response.dart';
+import 'package:rpro_mini/network/responses/order_details_response.dart';
 import 'package:rpro_mini/network/responses/parse_error_logger.dart';
 import 'package:rpro_mini/network/responses/post_method_response.dart';
 import 'package:rpro_mini/network/responses/table_response.dart';
@@ -88,5 +89,11 @@ abstract class ShoppyApi{
   @GET("$kEndPointSearchName/{name}")
   Future<ItemResponse> searchItemByName(
       @Path("name") String id,
+      );
+  
+  @GET(kEndPointGetOrder)
+  Future<OrderDetailsResponse> getOrderDetailsByTable(
+      @Query("tableID") int tableId,
+      @Query("tableOrderValue") int orderValue
       );
 }

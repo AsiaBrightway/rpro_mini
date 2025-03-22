@@ -10,6 +10,7 @@ import 'package:rpro_mini/data/vos/request/product_request_vo.dart';
 import 'package:rpro_mini/network/data_agents/shoppy_admin_agent.dart';
 import 'package:rpro_mini/network/data_agents/shoppy_admin_agent_impl.dart';
 import 'package:rpro_mini/network/responses/login_response.dart';
+import 'package:rpro_mini/network/responses/order_details_response.dart';
 import 'package:rpro_mini/network/responses/table_response.dart';
 import '../../network/responses/post_method_response.dart';
 
@@ -51,7 +52,7 @@ class ShoppyAdminModel{
   Future<PostMethodResponse?> addNewProduct(String token,ProductRequestVo request){
     return mDataAgent.addNewProduct(token,request);
   }
-
+ 
   Future<PostMethodResponse?> updateProductById(String token,int id,ProductRequestVo request){
     return mDataAgent.updateProductById(token, id, request);
   }
@@ -70,5 +71,9 @@ class ShoppyAdminModel{
 
   Future<List<ItemVo>?> searchItemByName(String name){
     return mDataAgent.searchItemByName(name).asStream().map((response) => response.data ?? []).first;
+  }
+
+  Future<OrderDetailsResponse> getOrderDetailsByTable(int tableId,int tableOrderValue){
+    return mDataAgent.getOrderDetailsByTable(tableId, tableOrderValue);
   }
 }
