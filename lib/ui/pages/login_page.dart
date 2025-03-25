@@ -27,6 +27,7 @@ class _LoginPageState extends State<LoginPage> {
   bool isLoading = false;
   final FocusNode _userNameFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
+  bool _obscureText = true;
 
   @override
   void initState() {
@@ -76,10 +77,10 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         toolbarHeight: 10,
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
       body: SingleChildScrollView(
         child: Container(
           margin: EdgeInsets.symmetric(horizontal: MediaQuery
@@ -129,9 +130,9 @@ class _LoginPageState extends State<LoginPage> {
                   controller: _userNameController,
                   focusNode: _userNameFocusNode,
                   decoration: InputDecoration(
-                    hintText: 'username',
+                    hintText: 'Enter Username',
                     errorText: _nameErrorMessage,
-                    hintStyle: const TextStyle(color: Colors.black38,
+                    hintStyle: TextStyle(color: Theme.of(context).colorScheme.surfaceBright,
                         fontFamily: 'Ubuntu',
                         fontSize: 14),
                     enabledBorder: UnderlineInputBorder(
@@ -157,12 +158,13 @@ class _LoginPageState extends State<LoginPage> {
                 child: TextField(
                   controller: _passwordController,
                   focusNode: _passwordFocusNode,
+                  obscureText: _obscureText,
                   decoration: InputDecoration(
                     hintText: 'password',
                     errorText: _passwordErrorMessage,
-                    hintStyle: const TextStyle(fontFamily: 'Ubuntu',
+                    hintStyle: TextStyle(fontFamily: 'Ubuntu',
                         fontSize: 14,
-                        color: Colors.black38),
+                        color: Theme.of(context).colorScheme.surfaceBright),
                     enabledBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: AppColors
                           .colorPrimary50), // Color when not focused
@@ -171,8 +173,19 @@ class _LoginPageState extends State<LoginPage> {
                       borderSide: BorderSide(color: AppColors
                           .colorPrimary), // Color when focused
                     ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscureText ? Icons.visibility_off : Icons.visibility,
+                        color: Theme.of(context).colorScheme.surfaceBright,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscureText = !_obscureText; // Toggle password visibility
+                        });
+                      },
+                    ),
                   ),
-                  keyboardType: TextInputType.emailAddress,
+                  keyboardType: TextInputType.visiblePassword,
                 ),
               ),
               const SizedBox(height: 50),

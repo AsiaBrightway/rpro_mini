@@ -43,7 +43,6 @@ class _UrlPageState extends State<UrlPage> {
     }catch(e){
       showAlertDialogBox(context, 'Url Error', e.toString());
     }
-
   }
 
   @override
@@ -56,10 +55,10 @@ class _UrlPageState extends State<UrlPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         toolbarHeight: 10,
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
       body: SingleChildScrollView(
         child: Container(
           margin: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.1),
@@ -98,7 +97,7 @@ class _UrlPageState extends State<UrlPage> {
                     hintText: 'Please enter url',
                     errorText: _nameErrorMessage,
                     errorStyle: const TextStyle(color: Colors.black45),
-                    hintStyle: const TextStyle(color:Colors.black38,fontFamily: 'Ubuntu',fontSize: 14),
+                    hintStyle: TextStyle(color: Theme.of(context).colorScheme.surfaceBright,fontFamily: 'Ubuntu',fontSize: 14),
                     enabledBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: AppColors.colorPrimary50), // Color when not focused
                     ),

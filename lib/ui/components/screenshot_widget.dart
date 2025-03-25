@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:rpro_mini/data/vos/item_vo.dart';
+import 'package:rpro_mini/data/vos/order_details_vo.dart';
 import 'package:screenshot/screenshot.dart'; // Ensure you have the `screenshot` package installed
 
 // Define a widget to encapsulate the Screenshot content
 class ScreenshotReceiptWidget extends StatelessWidget {
-  final List<ItemVo> items;
+  final List<OrderDetailsVo> items;
   final String? printerLocation;
   final double listWidth;
   final double textSize;
@@ -142,14 +143,14 @@ class ScreenshotReceiptWidget extends StatelessWidget {
                         Expanded(
                           flex: 2,
                           child: Text(
-                            "1",
+                            items[index].quantity.toString(),
                             style: TextStyle(fontSize: textSize, fontWeight: FontWeight.w400,color: Colors.black),
                           ),
                         ),
                         Expanded(
                           flex: 4,
                           child: Text(
-                            "no sugar",
+                            items[index].remark ?? '',
                             style: TextStyle(fontSize: textSize, fontWeight: FontWeight.w400,color: Colors.black),
                           ),
                         ),

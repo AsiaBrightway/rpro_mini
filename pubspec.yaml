@@ -58,6 +58,7 @@ dependencies:
   change_app_package_name: ^1.4.0
   pdf: ^3.10.0
   charset_converter: ^2.3.0
+  badges: ^3.1.0
 
   esc_pos_printer_plus: ^0.1.1
   esc_pos_utils_plus: ^2.0.4

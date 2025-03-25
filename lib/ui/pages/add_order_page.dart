@@ -8,13 +8,14 @@ import 'package:rpro_mini/data/vos/category_vo.dart';
 import 'package:rpro_mini/data/vos/item_vo.dart';
 import 'package:rpro_mini/ui/components/cached_category_image.dart';
 import 'package:rpro_mini/ui/components/flying_animation.dart';
+import 'package:badges/badges.dart' as badges;
 import 'package:rpro_mini/ui/pages/cart_page.dart';
 import 'package:rpro_mini/ui/themes/colors.dart';
 
 class AddOrderPage extends StatefulWidget {
   final String? tableName;
-  final int? tableId;
-  const AddOrderPage({super.key, this.tableName, this.tableId});
+  final int tableId;
+  const AddOrderPage({super.key, this.tableName, required this.tableId});
 
   @override
   State<AddOrderPage> createState() => _AddOrderPageState();
@@ -57,7 +58,7 @@ class _AddOrderPageState extends State<AddOrderPage> {
     super.dispose();
   }
 
-  void _animateToCart(BuildContext context, GlobalKey itemKey) {
+  void _animateToCart(BuildContext context, GlobalKey itemKey,AddOrderBloc bloc,int itemId) {
     final OverlayState overlayState = Overlay.of(context);
     final RenderBox itemBox = itemKey.currentContext!.findRenderObject() as RenderBox;
     final RenderBox cartBox = cartKey.currentContext!.findRenderObject() as RenderBox;
@@ -76,6 +77,7 @@ class _AddOrderPageState extends State<AddOrderPage> {
           endPosition: cartPosition,
           onComplete: () {
             overlayEntry.remove(); // Remove animation when done
+            bloc.addOrUpdateOrderItem(itemId);
           },
         );
       },
@@ -92,22 +94,81 @@ class _AddOrderPageState extends State<AddOrderPage> {
     return ChangeNotifierProvider(
       create: (context) => AddOrderBloc(),
       child: Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
         appBar: AppBar(
           automaticallyImplyLeading: false,
           title: Text(widget.tableName ?? "",style: const TextStyle(color: Colors.white)),
-          centerTitle: true,
           backgroundColor: AppColors.colorPrimary,
+          centerTitle: true,
           leading: IconButton(
               onPressed: _onBackPressed,
               icon: const Icon(Icons.arrow_back_ios,color: Colors.white)
           ),
           actions: [
-            IconButton(
-                key: cartKey,
-                onPressed: (){
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const CartPage()));
-                },
-                icon: const Icon(Icons.shopping_cart,color: Colors.white,))
+            Selector<AddOrderBloc, int>(
+              selector: (_, bloc) => bloc.selectedGroup,
+              builder: (context, selectedGroup, _) {
+                final bloc = context.read<AddOrderBloc>();
+                return DropdownButton<int>(
+                  value: selectedGroup,
+                  padding: const EdgeInsets.only(right: 8),
+                  style: const TextStyle(color: Colors.white),
+                  borderRadius: BorderRadius.circular(16),
+                  elevation: 8,
+                  dropdownColor: Colors.purple.shade300,
+                  items: [
+                    ...bloc.availableGroups.map((tableNum) {
+                      return DropdownMenuItem(
+                        value: tableNum,
+                        child: Text("G - $tableNum"),
+                      );
+                    }),
+                  ],
+                  onChanged:(value){
+                    if (value != selectedGroup) {  // ← Only trigger if value changed
+                      bloc.changeGroup(value!);
+                    }
+                  },
+                );
+              },
+            ),
+            Selector<AddOrderBloc,bool>(
+              selector: (context,bloc) => bloc.isAdd,
+              builder: (context,isAdd,_){
+                var bloc = context.read<AddOrderBloc>();
+                return GestureDetector(
+                  onTap: (){
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                CartPage(
+                                  newOrderItems: bloc.orderDetails,
+                                  group:bloc.selectedGroup,
+                                  tableId: widget.tableId,
+                                  tableName: widget.tableName ?? '',
+                                )
+                        )
+                    );
+                  },
+                  child: Padding(
+                    key: cartKey,
+                    padding: const EdgeInsets.only(right: 12),
+                    child: badges.Badge(
+                      showBadge: isAdd,
+                      badgeContent: const Text(
+                        '!',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      badgeStyle: const badges.BadgeStyle(
+                        badgeColor: Colors.red,
+                      ),
+                      child: const Icon(Icons.shopping_cart),
+                    ),
+                  ),
+                );
+              },
+            )
           ],
         ),
         body: Padding(
@@ -138,7 +199,8 @@ class _AddOrderPageState extends State<AddOrderPage> {
                                   controller: _searchController,
                                   decoration: InputDecoration(
                                     hintText: 'Search Items...',
-                                    prefixIcon: Icon(Icons.search,color: AppColors.cartBgColor),
+                                    hintStyle: TextStyle(color: Theme.of(context).colorScheme.surfaceBright),
+                                    prefixIcon: Icon(Icons.search,color: Theme.of(context).colorScheme.secondary),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(16),
                                     ),
@@ -149,7 +211,7 @@ class _AddOrderPageState extends State<AddOrderPage> {
 
                               /// Close Search Button
                               IconButton(
-                                icon: const Icon(Icons.close, color: Colors.black38),
+                                icon: Icon(Icons.close, color: Theme.of(context).colorScheme.secondary),
                                 onPressed: () {
                                   bloc.isSearching = !isSearching;
                                 },
@@ -235,7 +297,10 @@ class _AddOrderPageState extends State<AddOrderPage> {
                           children: [
                             Padding(
                               padding: const EdgeInsets.all(8.0),
-                              child: Text('Choose Items',style: TextStyle(color: AppColors.colorPrimary,fontFamily: 'Ubuntu',fontWeight: FontWeight.w600,fontSize: 16)),
+                              child: Text(
+                                  'Choose Items',
+                                  style: TextStyle(color: Theme.of(context).colorScheme.tertiary,fontFamily: 'Ubuntu',fontWeight: FontWeight.w600,fontSize: 16)
+                              ),
                             ),
                             Selector<AddOrderBloc,ItemState>(
                                 selector: (context,bloc) => bloc.itemState,
@@ -250,7 +315,7 @@ class _AddOrderPageState extends State<AddOrderPage> {
                             Row(
                               children: [
                                 IconButton(
-                                  icon: const Icon(Icons.search, color: Colors.black38),
+                                  icon: Icon(Icons.search, color: Theme.of(context).colorScheme.secondary),
                                   onPressed: () {
                                     var bloc = context.read<AddOrderBloc>();
                                     bloc.isSearching = !bloc.isSearching;
@@ -262,7 +327,7 @@ class _AddOrderPageState extends State<AddOrderPage> {
                                     return IconButton(
                                       icon: Icon(layout == 'list'
                                           ? Icons.list
-                                          : Icons.grid_view,color: Colors.black38),
+                                          : Icons.grid_view,color: Theme.of(context).colorScheme.secondary),
                                       onPressed: () {
                                         var bloc = context.read<AuthProvider>();
                                         bloc.toggleLayout();
@@ -282,6 +347,7 @@ class _AddOrderPageState extends State<AddOrderPage> {
               Selector<AuthProvider,String>(
                 selector: (context,bloc)=> bloc.layout,
                   builder: (context,layout,_){
+                  var bloc = context.read<AddOrderBloc>();
                   return Selector<AddOrderBloc,List<ItemVo>>(
                       selector: (context,itemBloc) => itemBloc.items,
                       builder: (context,itemList,_){
@@ -301,11 +367,12 @@ class _AddOrderPageState extends State<AddOrderPage> {
                                   child: InkWell(
                                     key: _itemKeys[index],
                                     onTap: (){
-                                      _animateToCart(context, _itemKeys[index]);
+                                      _animateToCart(context, _itemKeys[index],bloc,itemList[index].itemId);
                                       //Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingPage()));
                                     },
                                     child: Container(
                                       decoration: BoxDecoration(
+                                        color: Theme.of(context).colorScheme.primaryContainer,
                                         border: Border.all(color: Colors.black38,width: 0.6),
                                         borderRadius: BorderRadius.circular(10),
                                       ),
@@ -326,14 +393,14 @@ class _AddOrderPageState extends State<AddOrderPage> {
                                                 fit: BoxFit.cover,
                                                 errorWidget: (context, url, error) =>
                                                     Expanded(
-                                                        child: Image.asset('assets/placeholder_image.jpg')
+                                                        child: Image.asset('assets/placeholder_image.jpg',fit: BoxFit.cover,)
                                                     ),
                                               ),
                                             ),
                                           ),
                                           /// 📌 Title
                                           Padding(
-                                            padding: const EdgeInsets.only(left: 8.0,top: 4),
+                                            padding: const EdgeInsets.only(left: 8.0,top: 8),
                                             child: Text(
                                               itemList[index].itemName ?? '',
                                               style: const TextStyle(fontSize: 14),
@@ -341,7 +408,7 @@ class _AddOrderPageState extends State<AddOrderPage> {
                                             ),
                                           ),
                                           Padding(
-                                            padding: const EdgeInsets.only(left: 8.0),
+                                            padding: const EdgeInsets.only(left: 8,right: 4,bottom: 4),
                                             child: Text(
                                               itemList[index].itemPrice ?? '',
                                               style: const TextStyle(fontSize: 15,fontWeight: FontWeight.w700),
@@ -360,7 +427,7 @@ class _AddOrderPageState extends State<AddOrderPage> {
                         else{
                           return Expanded(
                             child: SizedBox(
-                                child: _buildListView(itemList)
+                                child: _buildListView(itemList,bloc)
                             ),
                           );
                         }
@@ -376,11 +443,12 @@ class _AddOrderPageState extends State<AddOrderPage> {
     );
   }
 
-  Widget _buildListView(List<ItemVo> itemList) {
+  Widget _buildListView(List<ItemVo> itemList,AddOrderBloc bloc) {
     return ListView.builder(
       itemCount: itemList.length,
       itemBuilder: (context, index) {
         return Card(
+          color: Theme.of(context).colorScheme.primaryContainer,
           key: _itemKeys[index],
           child: ListTile(
             leading: ClipRRect(
@@ -394,12 +462,15 @@ class _AddOrderPageState extends State<AddOrderPage> {
               ),
             ),
             title: Text(itemList[index].itemName ?? ''),
-            subtitle: Text(itemList[index].itemPrice ?? '0',style: TextStyle(color: AppColors.colorPrimary,fontSize: 16)),
+            subtitle: Text(
+                itemList[index].itemPrice ?? '0',
+                style: TextStyle(color: Theme.of(context).colorScheme.tertiary,fontSize: 16)
+            ),
             trailing: TextButton(
               onPressed: () {
-                _animateToCart(context, _itemKeys[index]);
+                _animateToCart(context, _itemKeys[index],bloc,itemList[index].itemId);
               },
-              child: const Text("Add"),
+              child: Text("Add",style: TextStyle(color: Theme.of(context).colorScheme.secondary)),
             ),
           ),
         );

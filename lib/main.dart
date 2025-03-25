@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
 import 'package:provider/provider.dart' as provider;
-import 'package:rpro_mini/ui/pages/home_page.dart';
 import 'package:rpro_mini/ui/pages/splash_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'bloc/auth_provider.dart';

@@ -24,19 +24,6 @@ class _BluetoothPrinterPageState extends State<BluetoothPrinterPage> {
     super.initState();
   }
 
-  Future<void> _printSampleReceipt() async {
-    var bloc = context.read<PrinterService>();
-      // final profile = await CapabilityProfile.load();
-      // final generator = Generator(PaperSize.mm80, profile);
-      List<int> bytes = [];
-      final image = decodeImage(theimageThatComesfromThePrinter);
-      // bytes += generator.imageRaster(image!);
-      await PrintBluetoothThermal.writeBytes(bytes);
-      if(!mounted){
-        bloc.disconnectToDevice();
-      }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,8 +44,6 @@ class _BluetoothPrinterPageState extends State<BluetoothPrinterPage> {
                   theimageThatComesfromThePrinter = capturedImage!;
                   setState(() {
                     theimageThatComesfromThePrinter = capturedImage;
-                    _printSampleReceipt();
-
                   });
                 }).catchError((onError) {
                   print(onError);

@@ -143,7 +143,7 @@ class _PrinterConfigPageState extends State<PrinterConfigPage> {
   Widget _buildPrinterTile(PrinterConfig printer, int index) {
     return Card(
       color: Theme.of(context).colorScheme.primaryContainer,
-      margin: const EdgeInsets.all(8),
+      margin: const EdgeInsets.symmetric(vertical: 8,horizontal: 16),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -209,7 +209,7 @@ class _PrinterConfigPageState extends State<PrinterConfigPage> {
       builder: (context) {
         return Container(
           padding: const EdgeInsets.all(16),
-          height: 300,
+          height: 400,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

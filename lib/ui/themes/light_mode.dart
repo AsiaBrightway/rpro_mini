@@ -1,6 +1,5 @@
 
 import 'package:flutter/material.dart';
-
 import 'colors.dart';
 
 final ThemeData lightMode = ThemeData(
@@ -13,10 +12,11 @@ final ThemeData lightMode = ThemeData(
     secondaryContainer: const Color.fromRGBO(244, 246, 245, 1.0),
     surface: Colors.grey.shade100,
     error: Colors.red,
-    onPrimary: Colors.white,
+    onPrimary: Colors.white, /// table card
+    tertiary: AppColors.colorPrimary, /// price color in card
     onSecondary: Colors.white,
     onSurface: Colors.black87,
-    surfaceBright: Colors.blue.shade100,
+    surfaceBright: Colors.grey.shade600,  /// hint text color
     onError: Colors.white,
     brightness: Brightness.light,
     onSurfaceVariant: Colors.white  ///bottom sheet bg color

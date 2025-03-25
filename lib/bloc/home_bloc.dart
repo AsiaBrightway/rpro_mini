@@ -37,13 +37,17 @@ class HomeBloc extends ChangeNotifier{
   }
 
   Future<void> fetchFloors() async {
+    _tableState = TableState.loading;
+    notifyListeners();
     _model.getFloors().then((onValue){
       _floors = onValue;
       fetchTables(_floors.first.floorId);
       selectedFloor = _floors.first.floorName;
       notifyListeners();
     }).catchError((onError){
-
+      _tableState = TableState.error;
+      _tableErrorMessage = 'Check you connection';
+      notifyListeners();
     });
 
     notifyListeners(); // Notify listeners when floors are updated

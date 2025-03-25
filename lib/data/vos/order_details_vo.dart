@@ -1,4 +1,3 @@
-
 import 'package:json_annotation/json_annotation.dart';
 part 'order_details_vo.g.dart';
 
@@ -13,6 +12,9 @@ class OrderDetailsVo {
   @JsonKey(name: 'item_id')
   final int itemId;
 
+  @JsonKey(name: 'main_category_id')
+  final int? mainCategoryId;
+
   @JsonKey(name: 'batch_number')
   final int? batchNumber;
 
@@ -20,10 +22,10 @@ class OrderDetailsVo {
   final String? promotionPrice;
 
   @JsonKey(name: 'quantity')
-  final int? quantity;
+  int quantity;
 
   @JsonKey(name: 'remark')
-  final String? remark;
+  String? remark;
 
   @JsonKey(name: 'is_ordered')
   final int? isOrdered;
@@ -46,6 +48,12 @@ class OrderDetailsVo {
   @JsonKey(name: 'item_price')
   final String itemPrice;
 
+  @JsonKey(name: 'item_name')
+  final String itemName;
+
+  @JsonKey(name: 'item_image')
+  final String? itemImage;
+
   OrderDetailsVo(
       this.orderDetailsId,
       this.orderId,
@@ -59,7 +67,7 @@ class OrderDetailsVo {
       this.orderType,
       this.orderedBy,
       this.createdAt,
-      this.updatedAt, this.itemPrice);
+      this.updatedAt, this.itemPrice, this.itemName, this.itemImage, this.mainCategoryId);
 
   factory OrderDetailsVo.fromJson(Map<String, dynamic> json) =>
       _$OrderDetailsVoFromJson(json);

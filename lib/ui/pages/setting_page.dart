@@ -21,21 +21,23 @@ import 'package:rpro_mini/ui/themes/colors.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../bloc/bluetooth_service.dart';
+import '../../data/vos/order_details_vo.dart';
 import '../../utils/helper_functions.dart';
 
 class SettingPage extends StatefulWidget {
-  const SettingPage({super.key});
+  final List<OrderDetailsVo> orderItems;
+  const SettingPage({super.key, required this.orderItems});
 
   @override
   State<SettingPage> createState() => _SettingPageState();
 }
 
 class _SettingPageState extends State<SettingPage> {
-  List<ItemVo> orderItems = [
-    ItemVo(1, 1, 6, 3, "itemCode", "barCode", "ဝက်နံရိုးဟင်းရည် ပူပူလေး‌", "", "", "", "", "8000", "700"),
-    ItemVo(2, 1, 6, 3, "itemCode", "barCode", "Carlsberg beer", "", "", "", "", "7000", "700"),
-    ItemVo(3, 2, 5, 3, "itemCode", "barCode", "တောက်တောက်", "", "", "", "", "5000", "700"),
-  ];
+  // List<ItemVo> orderItems = [
+  //   ItemVo(1, 1, 6, 3, "itemCode", "barCode", "ဝက်နံရိုးဟင်းရည် ပူပူလေး‌", "", "", "", "", "8000", "700"),
+  //   ItemVo(2, 1, 6, 3, "itemCode", "barCode", "Carlsberg beer", "", "", "", "", "7000", "700"),
+  //   ItemVo(3, 2, 5, 3, "itemCode", "barCode", "တောက်တောက်", "", "", "", "", "5000", "700"),
+  // ];
 
   String formattedDateTime = DateFormat('yyyy-MM-dd h:mm:ss a').format(DateTime.now());
   ScreenshotController screenshotControllerBar = ScreenshotController();
@@ -76,7 +78,7 @@ class _SettingPageState extends State<SettingPage> {
     }
   }
 
-  Future<void> _captureAndPrintOrders(List<ItemVo> orderItems,PrintReceiptBloc bloc) async {
+  Future<void> _captureAndPrintOrders(List<OrderDetailsVo> orderItems,PrintReceiptBloc bloc) async {
     try {
       List<Future<Uint8List?>> imageFutures = [];
 
@@ -374,12 +376,12 @@ class _SettingPageState extends State<SettingPage> {
                         }),
                     const SizedBox(height: 16,),
                     /// Kitchen Order Screenshot Widget
-                    if (orderItems.any((item) => item.mainCategoryId == 1))
+                    if (widget.orderItems.any((item) => item.mainCategoryId == 1))
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           ScreenshotReceiptWidget(
-                            items: orderItems.where((item) => item.mainCategoryId == 1).toList(),
+                            items: widget.orderItems.where((item) => item.mainCategoryId == 1).toList(),
                             screenshotController: screenshotControllerKitchen, // Controller for Kitchen
                             listWidth: 200,
                             textSize: 8,
@@ -413,12 +415,12 @@ class _SettingPageState extends State<SettingPage> {
                     const SizedBox(height: 16),
 
                     /// BBQ Screenshot Widget,
-                    if (orderItems.any((item) => item.mainCategoryId == 2))
+                    if (widget.orderItems.any((item) => item.mainCategoryId == 2))
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           ScreenshotReceiptWidget(
-                            items: orderItems.where((item) => item.mainCategoryId == 2).toList(),
+                            items: widget.orderItems.where((item) => item.mainCategoryId == 2).toList(),
                             screenshotController: screenshotControllerBBQ, // Controller for BBQ
                             listWidth: 200,
                             textSize: 8,
@@ -452,12 +454,12 @@ class _SettingPageState extends State<SettingPage> {
                     const SizedBox(height: 16),
 
                     // Display the Bar Order Screenshot Widget only if it's in the orderItems
-                    if (orderItems.any((item) => item.mainCategoryId == 3))
+                    if (widget.orderItems.any((item) => item.mainCategoryId == 3))
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           ScreenshotReceiptWidget(
-                            items: orderItems.where((item) => item.mainCategoryId == 3).toList(),
+                            items: widget.orderItems.where((item) => item.mainCategoryId == 3).toList(),
                             screenshotController: screenshotControllerBar, // Controller for Bar
                             listWidth: 200,
                             textSize: 14,
@@ -491,11 +493,11 @@ class _SettingPageState extends State<SettingPage> {
                     const SizedBox(height: 16,),
 
                     /// Counter Screenshot
-                    if (orderItems.any((item) => item.mainCategoryId == 4))
+                    if (widget.orderItems.any((item) => item.mainCategoryId == 4))
                       Row(
                         children: [
                           ScreenshotReceiptWidget(
-                            items: orderItems.where((item) => item.mainCategoryId == 4).toList(),
+                            items: widget.orderItems.where((item) => item.mainCategoryId == 4).toList(),
                             screenshotController: screenshotControllerCounter, // Controller for Counter
                             listWidth: 200,
                             textSize: 8,
@@ -537,7 +539,7 @@ class _SettingPageState extends State<SettingPage> {
                               child: ElevatedButton.icon(
                                   onPressed: () async{
                                     bloc.sendOrderToServer();
-                                    _captureAndPrintOrders(orderItems,bloc);
+                                    _captureAndPrintOrders(widget.orderItems,bloc);
                                   },
                                   style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.blue,
