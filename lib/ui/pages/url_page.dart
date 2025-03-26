@@ -15,8 +15,8 @@ class UrlPage extends StatefulWidget {
 
 class _UrlPageState extends State<UrlPage> {
   final ShoppyAdminAgentImpl shoppyAdminAgent = ShoppyAdminAgentImpl();
+  final _restaurantController = TextEditingController();
   final _urlController = TextEditingController();
-  final RegExp emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
   String? _nameErrorMessage;
 
   @override
@@ -32,11 +32,17 @@ class _UrlPageState extends State<UrlPage> {
       return;
     }
 
+    if(_restaurantController.text.isEmpty){
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter Restaurant!")),
+      );
+      return;
+    }
     final authModel = Provider.of<AuthProvider>(context,listen: false);
     // Update the baseUrl in ShoppyAdminAgentImpl
     try{
       shoppyAdminAgent.updateBaseUrl(_urlController.text);
-      authModel.saveUrl(_urlController.text);
+      authModel.saveUrl(_urlController.text,_restaurantController.text);
       showSuccessToast(context, 'Url saved Successfully');
       await Future.delayed(const Duration(milliseconds: 300));
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginPage()));
@@ -48,6 +54,7 @@ class _UrlPageState extends State<UrlPage> {
   @override
   void dispose() {
     _urlController.dispose();
+    _restaurantController.dispose();
     super.dispose();
   }
 
@@ -88,6 +95,23 @@ class _UrlPageState extends State<UrlPage> {
                 ),
               ),
               const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: TextField(
+                  controller: _restaurantController,
+                  decoration: InputDecoration(
+                    hintText: 'Enter Restaurant Name',
+                    hintStyle: TextStyle(color: Theme.of(context).colorScheme.surfaceBright,fontFamily: 'Ubuntu',fontSize: 14),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.colorPrimary50), // Color when not focused
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.colorPrimary), // Color when focused
+                    ),
+                  ),
+                  keyboardType: TextInputType.url,
+                ),
+              ),
               ///email edit text
               Padding(
                 padding: const EdgeInsets.all(8),

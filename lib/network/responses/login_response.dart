@@ -1,5 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
+import '../../data/vos/user_vo.dart';
+
 part 'login_response.g.dart';
 
 @JsonSerializable()
@@ -7,7 +9,10 @@ class LoginResponse {
   @JsonKey(name: 'message')
   final String message;
 
-  LoginResponse({
+  @JsonKey(name: 'user')
+  final UserVo user;
+
+  LoginResponse(this.user, {
     required this.message,
   });
 

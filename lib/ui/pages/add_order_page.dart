@@ -14,8 +14,9 @@ import 'package:rpro_mini/ui/themes/colors.dart';
 
 class AddOrderPage extends StatefulWidget {
   final String? tableName;
+  final String floorName;
   final int tableId;
-  const AddOrderPage({super.key, this.tableName, required this.tableId});
+  const AddOrderPage({super.key, this.tableName, required this.tableId, required this.floorName});
 
   @override
   State<AddOrderPage> createState() => _AddOrderPageState();
@@ -147,6 +148,7 @@ class _AddOrderPageState extends State<AddOrderPage> {
                                   group:bloc.selectedGroup,
                                   tableId: widget.tableId,
                                   tableName: widget.tableName ?? '',
+                                  floorName: widget.floorName,
                                 )
                         )
                     );
@@ -363,60 +365,58 @@ class _AddOrderPageState extends State<AddOrderPage> {
                               ),
                               itemCount: itemList.length,
                               itemBuilder: (context, index) {
-                                return Expanded(
-                                  child: InkWell(
-                                    key: _itemKeys[index],
-                                    onTap: (){
-                                      _animateToCart(context, _itemKeys[index],bloc,itemList[index].itemId);
-                                      //Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingPage()));
-                                    },
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: Theme.of(context).colorScheme.primaryContainer,
-                                        border: Border.all(color: Colors.black38,width: 0.6),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          // 🖼 CachedNetworkImage Implementation
-                                          Expanded(
-                                            child: ClipRRect(
-                                              borderRadius: const BorderRadius.only(
-                                                topLeft: Radius.circular(10),
-                                                topRight: Radius.circular(10),
-                                              ),
-                                              child: CachedNetworkImage(
-                                                imageUrl: '$baseUrl/storage/Images/${itemList[index].image}',
-                                                width: double.infinity,
-                                                fit: BoxFit.cover,
-                                                errorWidget: (context, url, error) =>
-                                                    Expanded(
-                                                        child: Image.asset('assets/placeholder_image.jpg',fit: BoxFit.cover,)
-                                                    ),
-                                              ),
+                                return InkWell(
+                                  key: _itemKeys[index],
+                                  onTap: (){
+                                    _animateToCart(context, _itemKeys[index],bloc,itemList[index].itemId);
+                                    //Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingPage()));
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).colorScheme.primaryContainer,
+                                      border: Border.all(color: Colors.black38,width: 0.6),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        // 🖼 CachedNetworkImage Implementation
+                                        Expanded(
+                                          child: ClipRRect(
+                                            borderRadius: const BorderRadius.only(
+                                              topLeft: Radius.circular(10),
+                                              topRight: Radius.circular(10),
+                                            ),
+                                            child: CachedNetworkImage(
+                                              imageUrl: '$baseUrl/storage/Images/${itemList[index].image}',
+                                              width: double.infinity,
+                                              fit: BoxFit.cover,
+                                              errorWidget: (context, url, error) =>
+                                                  Expanded(
+                                                      child: Image.asset('assets/placeholder_image.jpg',fit: BoxFit.cover,)
+                                                  ),
                                             ),
                                           ),
-                                          /// 📌 Title
-                                          Padding(
-                                            padding: const EdgeInsets.only(left: 8.0,top: 8),
-                                            child: Text(
-                                              itemList[index].itemName ?? '',
-                                              style: const TextStyle(fontSize: 14),
-                                              textAlign: TextAlign.center, // Center title
-                                            ),
+                                        ),
+                                        /// 📌 Title
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 8.0,top: 8),
+                                          child: Text(
+                                            itemList[index].itemName ?? '',
+                                            style: const TextStyle(fontSize: 14),
+                                            textAlign: TextAlign.center, // Center title
                                           ),
-                                          Padding(
-                                            padding: const EdgeInsets.only(left: 8,right: 4,bottom: 4),
-                                            child: Text(
-                                              itemList[index].itemPrice ?? '',
-                                              style: const TextStyle(fontSize: 15,fontWeight: FontWeight.w700),
-                                              textAlign: TextAlign.center, // Center title
-                                            ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 8,right: 4,bottom: 4),
+                                          child: Text(
+                                            itemList[index].itemPrice ?? '',
+                                            style: const TextStyle(fontSize: 15,fontWeight: FontWeight.w700),
+                                            textAlign: TextAlign.center, // Center title
                                           ),
-                                        ],
-                                      ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 );

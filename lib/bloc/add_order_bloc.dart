@@ -113,7 +113,8 @@ class AddOrderBloc extends ChangeNotifier{
             item.price!,
             item.itemName ?? '',
             item.image ?? '',
-            item.mainCategoryId
+            item.mainCategoryId,
+            item.unitName
           ));
       notifyListeners();
     }

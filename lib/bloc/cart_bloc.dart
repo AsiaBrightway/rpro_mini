@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:rpro_mini/bloc/add_order_bloc.dart';
 import 'package:rpro_mini/data/models/shoppy_admin_model.dart';
 import 'package:rpro_mini/data/vos/order_details_vo.dart';
+import 'package:rpro_mini/utils/helper_functions.dart';
 
 class CartBloc extends ChangeNotifier{
 
@@ -94,13 +95,18 @@ class CartBloc extends ChangeNotifier{
     }
   }
 
-  Future<void> removeItem(OrderDetailsVo item) async{
+  Future<void> removeItem(OrderDetailsVo item,BuildContext context) async{
     if(item.orderId == 0){
       newOrderItems.removeWhere((i) => i.itemId == item.itemId && i.isOrdered == 0);
       combinedOrderItems = [..._orderDetailsList, ...newOrderItems];
       notifyListeners();
     }else{
-      /// remove network data
+      _model.deleteOrderItem(item.orderDetailsId).then((onValue){
+        showSuccessToast(context, onValue.message.toString());
+        getOrderDetails();
+      }).catchError((onError){
+        showScaffoldMessage(context, 'Unable to delete. Check connection');
+      });
     }
   }
 }

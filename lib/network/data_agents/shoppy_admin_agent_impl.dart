@@ -6,6 +6,7 @@ import 'package:rpro_mini/data/vos/floor_vo.dart';
 import 'package:rpro_mini/data/vos/request/color_request_vo.dart';
 import 'package:rpro_mini/data/vos/request/product_request_vo.dart';
 import 'package:rpro_mini/network/data_agents/shoppy_admin_agent.dart';
+import 'package:rpro_mini/network/responses/add_response.dart';
 import 'package:rpro_mini/network/responses/brand_response.dart';
 import 'package:rpro_mini/network/responses/category_response.dart';
 import 'package:rpro_mini/network/responses/item_response.dart';
@@ -17,8 +18,7 @@ import 'package:rpro_mini/network/shoppy_api.dart';
 import '../../data/vos/error_vo.dart';
 import '../../exception/custom_exception.dart';
 
-class
-ShoppyAdminAgentImpl extends ShoppyAdminAgent{
+class ShoppyAdminAgentImpl extends ShoppyAdminAgent{
   late Dio dio;
   late ShoppyApi shoppyApi;
 
@@ -213,6 +213,13 @@ ShoppyAdminAgentImpl extends ShoppyAdminAgent{
   Future<OrderDetailsResponse> getOrderDetailsByTable(int tableId, int tableOrderValue) {
     return shoppyApi.getOrderDetailsByTable(tableId, tableOrderValue).catchError((onError){
       throw _createException(onError.toString());
+    });
+  }
+
+  @override
+  Future<AddResponse> deleteOrderItem(int id) {
+    return shoppyApi.deleteOrderItem(id).catchError((onError){
+      throw _createException(onError);
     });
   }
 }

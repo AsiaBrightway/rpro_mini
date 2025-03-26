@@ -43,6 +43,9 @@ class ItemVo{
   @JsonKey(name: 'updated_at')
   final String? updatedAt;
 
+  @JsonKey(name: 'unit_name')
+  final String? unitName;
+
   ItemVo(
       this.itemId,
       this.mainCategoryId,
@@ -54,7 +57,10 @@ class ItemVo{
       this.otherName,
       this.image,
       this.createdAt,
-      this.updatedAt, this.price, this.itemPrice);
+      this.updatedAt,
+      this.price,
+      this.itemPrice,
+      this.unitName);
 
   factory ItemVo.fromJson(Map<String, dynamic> json) =>
       _$ItemVoFromJson(json);

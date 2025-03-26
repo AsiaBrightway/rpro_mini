@@ -21,7 +21,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   @override
   void initState() {
     super.initState();
-
   }
 
   @override
@@ -35,7 +34,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           appBar: AppBar(
             toolbarHeight: 80,
             iconTheme: const IconThemeData(
-              color: Colors.white, // Set the drawer icon color
+              color: Colors.white, // drawer icon color
             ),
             title: const Text('R Pro', style: TextStyle(color: Colors.white)),
             backgroundColor: AppColors.colorPrimary,
@@ -44,10 +43,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           drawer: const UserDrawer(),
           body: RefreshIndicator(
             onRefresh: () async {
-              await bloc.fetchFloors(); // Your refresh method
+              await bloc.fetchFloors(); // refresh method
             },
             child: Column(
               children: [
+                ///floors list
                 Selector<HomeBloc,List<FloorVo>>(
                     selector: (context,bloc) => bloc.floors,
                     builder: (context,floors,_){
@@ -161,6 +161,7 @@ class TableCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var bloc = context.read<HomeBloc>();
     bool isOccupied = occupiedTables?.contains(table.tableId) ?? false;
     bool isReservation = reservationTables?.contains(table.tableId) ?? false;
     return Card(
@@ -173,7 +174,15 @@ class TableCard extends StatelessWidget {
       elevation: 4,
       child: InkWell(
         onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => AddOrderPage(tableName: table.tableName, tableId: table.tableId)));
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      AddOrderPage(
+                        tableName: table.tableName,
+                        tableId: table.tableId,
+                        floorName: bloc.selectedFloor.toString(),
+                      )));
         },
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

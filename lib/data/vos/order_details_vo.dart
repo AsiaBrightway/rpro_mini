@@ -54,6 +54,9 @@ class OrderDetailsVo {
   @JsonKey(name: 'item_image')
   final String? itemImage;
 
+  @JsonKey(name: 'unit_name')
+  final String? unitName;
+
   OrderDetailsVo(
       this.orderDetailsId,
       this.orderId,
@@ -67,7 +70,7 @@ class OrderDetailsVo {
       this.orderType,
       this.orderedBy,
       this.createdAt,
-      this.updatedAt, this.itemPrice, this.itemName, this.itemImage, this.mainCategoryId);
+      this.updatedAt, this.itemPrice, this.itemName, this.itemImage, this.mainCategoryId, this.unitName);
 
   factory OrderDetailsVo.fromJson(Map<String, dynamic> json) =>
       _$OrderDetailsVoFromJson(json);

@@ -52,11 +52,13 @@ class _LoginPageState extends State<LoginPage> {
         _nameErrorMessage = null;
         _passwordErrorMessage = null;
       });
+
       _model.adminLogin(_userNameController.text, _passwordController.text).then((onValue){
         setState(() { isLoading = false; });
         final authModel = Provider.of<AuthProvider>(context,listen: false);
-        authModel.saveTokenToDatabase(_userNameController.text, _passwordController.text);
+        authModel.saveTokenToDatabase(_userNameController.text, _passwordController.text,onValue!.user.name);
         Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const HomePage()),(routes) => false);
+
       }).catchError((onError){
         setState(() { isLoading = false; });
         showAlertDialogBox(context, 'Login failed !', onError.toString());

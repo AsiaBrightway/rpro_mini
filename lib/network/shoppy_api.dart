@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:retrofit/http.dart';
 import 'package:rpro_mini/data/vos/floor_vo.dart';
+import 'package:rpro_mini/network/responses/add_response.dart';
 import 'package:rpro_mini/network/responses/brand_response.dart';
 import 'package:rpro_mini/network/responses/category_response.dart';
 import 'package:rpro_mini/network/responses/item_response.dart';
@@ -95,5 +96,10 @@ abstract class ShoppyApi{
   Future<OrderDetailsResponse> getOrderDetailsByTable(
       @Query("tableID") int tableId,
       @Query("tableOrderValue") int orderValue
+      );
+
+  @DELETE("$kEndPointDeleteOrder/{id}")
+  Future<AddResponse> deleteOrderItem(
+      @Path("id") int id,
       );
 }

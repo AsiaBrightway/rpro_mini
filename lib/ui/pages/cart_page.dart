@@ -13,9 +13,10 @@ import '../../bloc/auth_provider.dart';
 class CartPage extends StatefulWidget {
   final List<OrderDetailsVo>? newOrderItems;
   final String tableName;
+  final String floorName;
   final int group;
   final int tableId;
-  const CartPage({super.key, this.newOrderItems, required this.group, required this.tableId, required this.tableName});
+  const CartPage({super.key, this.newOrderItems, required this.group, required this.tableId, required this.tableName, required this.floorName});
 
   @override
   State<CartPage> createState() => _CartPageState();
@@ -27,7 +28,6 @@ class _CartPageState extends State<CartPage> {
   @override
   void initState() {
     super.initState();
-    print("Group ${widget.group}");
     _initializeData();
   }
 
@@ -64,7 +64,9 @@ class _CartPageState extends State<CartPage> {
     );
 
     if (shouldDelete == true) {
-      bloc.removeItem(item); // Call your BLoC delete method
+      if(mounted) {
+        bloc.removeItem(item,context); // Call your BLoC delete method
+      }
     }
   }
 
@@ -174,7 +176,8 @@ class _CartPageState extends State<CartPage> {
                       ...bloc.availableGroups.map((tableNum) {
                         return DropdownMenuItem(
                           value: tableNum,
-                          child: Text(tableNum.toString()),
+                          child: Text("G - $tableNum"),
+
                         );
                       }),
                     ],
@@ -185,6 +188,11 @@ class _CartPageState extends State<CartPage> {
                     },
                   );
                 },
+              ),
+            if(widget.newOrderItems?.isEmpty == false)
+              Padding(
+                padding: const EdgeInsets.only(right: 10),
+                child: Text('G - ${widget.group}',style: const TextStyle(color: Colors.white,fontWeight: FontWeight.w500),),
               )
           ],
         ),
@@ -262,7 +270,14 @@ class _CartPageState extends State<CartPage> {
                                         onPressed:(){
                                           Navigator.push(
                                               context,
-                                              MaterialPageRoute(builder: (context) => SettingPage(orderItems: bloc.newOrderItems))
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      SettingPage(
+                                                        orderItems: bloc.newOrderItems,
+                                                        tableName: widget.tableName,
+                                                        floorName: widget.floorName,
+                                                        groupName: widget.group.toString())
+                                              )
                                           );
                                         },
                                         child: const Text('Place Order',style: TextStyle(color: Colors.white),)),

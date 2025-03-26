@@ -14,42 +14,44 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 import 'package:provider/provider.dart';
 import 'package:rpro_mini/bloc/print_receipt_bloc.dart';
-import 'package:rpro_mini/data/vos/item_vo.dart';
 import 'package:rpro_mini/data/vos/printer_config.dart';
+import 'package:rpro_mini/network/api_constants.dart';
 import 'package:rpro_mini/ui/components/screenshot_widget.dart';
 import 'package:rpro_mini/ui/themes/colors.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../bloc/auth_provider.dart';
 import '../../bloc/bluetooth_service.dart';
 import '../../data/vos/order_details_vo.dart';
 import '../../utils/helper_functions.dart';
 
 class SettingPage extends StatefulWidget {
   final List<OrderDetailsVo> orderItems;
-  const SettingPage({super.key, required this.orderItems});
+  final String tableName;
+  final String floorName;
+  final String groupName;
+  const SettingPage({super.key, required this.orderItems, required this.tableName, required this.floorName, required this.groupName});
 
   @override
   State<SettingPage> createState() => _SettingPageState();
 }
 
 class _SettingPageState extends State<SettingPage> {
-  // List<ItemVo> orderItems = [
-  //   ItemVo(1, 1, 6, 3, "itemCode", "barCode", "ဝက်နံရိုးဟင်းရည် ပူပူလေး‌", "", "", "", "", "8000", "700"),
-  //   ItemVo(2, 1, 6, 3, "itemCode", "barCode", "Carlsberg beer", "", "", "", "", "7000", "700"),
-  //   ItemVo(3, 2, 5, 3, "itemCode", "barCode", "တောက်တောက်", "", "", "", "", "5000", "700"),
-  // ];
 
   String formattedDateTime = DateFormat('yyyy-MM-dd h:mm:ss a').format(DateTime.now());
   ScreenshotController screenshotControllerBar = ScreenshotController();
   ScreenshotController screenshotControllerKitchen = ScreenshotController();
   ScreenshotController screenshotControllerBBQ = ScreenshotController();
   ScreenshotController screenshotControllerCounter = ScreenshotController();
+  bool _permissionsRequested = false;
 
   Uint8List? theBarImage; //3
   Uint8List? theKitchenImage; //1
   Uint8List? theBBQImage; //2
   Uint8List? theCounterImage; //4
 
+  String restaurantName = '';
+  String empName = '';
   PrinterService? _printerService;
   List<PrinterConfig> printers = [];
 
@@ -62,12 +64,15 @@ class _SettingPageState extends State<SettingPage> {
       _printerService = context.read<PrinterService>();
       _printerService?.getPairedDevices();
     });
+
+    final authModel = Provider.of<AuthProvider>(context,listen: false);
+    empName = authModel.empName;
+    restaurantName = authModel.restName;
   }
 
   Future<void> _loadPrinterConfig() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String>? printerList = prefs.getStringList('printer_config');
-
     if (printerList != null) {
       setState(() {
         printers = printerList.map((p) => PrinterConfig.fromJson(jsonDecode(p))).toList();
@@ -86,16 +91,16 @@ class _SettingPageState extends State<SettingPage> {
       for (var item in orderItems) {
         switch (item.mainCategoryId) {
           case 3:
-            imageFutures.add(screenshotControllerBar.capture(delay: const Duration(milliseconds: 50)));
+            imageFutures.add(screenshotControllerBar.capture(delay: const Duration(milliseconds: 100)));
             break;
           case 1:
-            imageFutures.add(screenshotControllerKitchen.capture(delay: const Duration(milliseconds: 50)));
+            imageFutures.add(screenshotControllerKitchen.capture(delay: const Duration(milliseconds: 100)));
             break;
           case 2:
-            imageFutures.add(screenshotControllerBBQ.capture(delay: const Duration(milliseconds: 50)));
+            imageFutures.add(screenshotControllerBBQ.capture(delay: const Duration(milliseconds: 100)));
             break;
           case 4:
-            imageFutures.add(screenshotControllerCounter.capture(delay: const Duration(milliseconds: 50)));
+            imageFutures.add(screenshotControllerCounter.capture(delay: const Duration(milliseconds: 100)));
             break;
           default:
           // Handle any other cases or show an error
@@ -188,7 +193,7 @@ class _SettingPageState extends State<SettingPage> {
       }
       final resizedImage = copyResize(image,width: 576);  // 80mm printers
       bytes += generator.imageRaster(resizedImage);
-
+      bytes += generator.hr();
       bool success = await PrintBluetoothThermal.writeBytes(bytes);
       if (success) {
         bloc.changePrintState(config.name, 2);
@@ -246,7 +251,7 @@ class _SettingPageState extends State<SettingPage> {
   List<int> _generateReceiptHeader(Generator generator, String printerName) {
     List<int> bytes = [];
     bytes.addAll(generator.text(
-      'INNOCENT',
+      restaurantName,
       styles: const PosStyles(
         align: PosAlign.center,
         bold: true,
@@ -265,7 +270,8 @@ class _SettingPageState extends State<SettingPage> {
       ),
     ));
     bytes.addAll(generator.text(formattedDateTime));
-    bytes.addAll(generator.text('G-Floor, B4, 1'));
+    bytes.addAll(generator.text('${widget.floorName}, ${widget.tableName}, ${widget.groupName}'));
+    bytes.addAll(generator.text(empName));
     bytes.addAll(generator.hr());
 
     // Table Header
@@ -288,6 +294,9 @@ class _SettingPageState extends State<SettingPage> {
   }
 
   Future<void> requestBluetoothPermissions() async {
+    if (_permissionsRequested) return;
+    _permissionsRequested = true;
+
     if (await Permission.bluetoothScan.isDenied ||
         await Permission.bluetoothConnect.isDenied) {
       await Permission.bluetoothScan.request();
@@ -296,10 +305,11 @@ class _SettingPageState extends State<SettingPage> {
 
     if (await Permission.bluetoothScan.isPermanentlyDenied ||
         await Permission.bluetoothConnect.isPermanentlyDenied) {
-      openAppSettings(); // Opens the app settings to enable Nearby Devices
+      openAppSettings();
     }
 
-    if (await Permission.bluetoothScan.isGranted && await Permission.bluetoothConnect.isGranted) {
+    if (await Permission.bluetoothScan.isGranted &&
+        await Permission.bluetoothConnect.isGranted) {
       print("Bluetooth permissions granted");
     } else {
       print("Bluetooth permissions denied or Nearby Devices permission disabled");
@@ -356,7 +366,7 @@ class _SettingPageState extends State<SettingPage> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   CupertinoActivityIndicator(),
-                                  const SizedBox(width: 8,),
+                                  SizedBox(width: 8),
                                   Text('Uploading')
                                 ],
                               ),
@@ -371,7 +381,7 @@ class _SettingPageState extends State<SettingPage> {
                                   bloc.sendOrderToServer();
                                 });
                           }else{
-                            return SizedBox(height: 16);
+                            return const SizedBox(height: 16);
                           }
                         }),
                     const SizedBox(height: 16,),
@@ -383,9 +393,13 @@ class _SettingPageState extends State<SettingPage> {
                           ScreenshotReceiptWidget(
                             items: widget.orderItems.where((item) => item.mainCategoryId == 1).toList(),
                             screenshotController: screenshotControllerKitchen, // Controller for Kitchen
-                            listWidth: 200,
                             textSize: 8,
-                            printerLocation: 'Kitchen',
+                            printerLocation: KITCHEN,
+                            floorName: widget.floorName,
+                            tableName: widget.tableName,
+                            groupName: widget.groupName,
+                            empName: empName,
+                            restaurantName: restaurantName,
                           ),
                           Selector<PrintReceiptBloc,int>(
                               selector: (context,bloc) => bloc.kitchenSuccess,
@@ -422,9 +436,12 @@ class _SettingPageState extends State<SettingPage> {
                           ScreenshotReceiptWidget(
                             items: widget.orderItems.where((item) => item.mainCategoryId == 2).toList(),
                             screenshotController: screenshotControllerBBQ, // Controller for BBQ
-                            listWidth: 200,
-                            textSize: 8,
-                            printerLocation: 'BBQ',
+                            textSize: printers[2].textSize.toDouble(),
+                            printerLocation: BBQ,
+                            floorName: widget.floorName,
+                            tableName: widget.tableName,
+                            groupName: widget.groupName,
+                            empName: empName, restaurantName: '',
                           ),
                           Selector<PrintReceiptBloc,int>(
                               selector: (context,bloc) => bloc.bbqSuccess,
@@ -461,9 +478,13 @@ class _SettingPageState extends State<SettingPage> {
                           ScreenshotReceiptWidget(
                             items: widget.orderItems.where((item) => item.mainCategoryId == 3).toList(),
                             screenshotController: screenshotControllerBar, // Controller for Bar
-                            listWidth: 200,
                             textSize: 14,
-                            printerLocation: 'Bar',
+                            printerLocation: BAR,
+                            floorName: widget.floorName,
+                            tableName: widget.tableName,
+                            groupName: widget.groupName,
+                            empName: empName,
+                            restaurantName: restaurantName,
                           ),
                           Selector<PrintReceiptBloc,int>(
                               selector: (context,bloc) => bloc.barSuccess,
@@ -499,9 +520,13 @@ class _SettingPageState extends State<SettingPage> {
                           ScreenshotReceiptWidget(
                             items: widget.orderItems.where((item) => item.mainCategoryId == 4).toList(),
                             screenshotController: screenshotControllerCounter, // Controller for Counter
-                            listWidth: 200,
                             textSize: 8,
-                            printerLocation: 'Counter',
+                            printerLocation: COUNTER,
+                            floorName: widget.floorName,
+                            tableName: widget.tableName,
+                            groupName: widget.groupName,
+                            empName: empName,
+                            restaurantName: restaurantName,
                           ),
                           Selector<PrintReceiptBloc,int>(
                               selector: (context,bloc) => bloc.counterSuccess,

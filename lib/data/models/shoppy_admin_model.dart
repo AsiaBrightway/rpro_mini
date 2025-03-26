@@ -12,6 +12,7 @@ import 'package:rpro_mini/network/data_agents/shoppy_admin_agent_impl.dart';
 import 'package:rpro_mini/network/responses/login_response.dart';
 import 'package:rpro_mini/network/responses/order_details_response.dart';
 import 'package:rpro_mini/network/responses/table_response.dart';
+import '../../network/responses/add_response.dart';
 import '../../network/responses/post_method_response.dart';
 
 class ShoppyAdminModel{
@@ -75,5 +76,9 @@ class ShoppyAdminModel{
 
   Future<OrderDetailsResponse> getOrderDetailsByTable(int tableId,int tableOrderValue){
     return mDataAgent.getOrderDetailsByTable(tableId, tableOrderValue);
+  }
+
+  Future<AddResponse> deleteOrderItem(int id){
+    return mDataAgent.deleteOrderItem(id);
   }
 }

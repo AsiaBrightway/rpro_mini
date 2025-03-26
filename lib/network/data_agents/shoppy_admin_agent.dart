@@ -1,11 +1,11 @@
 
 import 'dart:io';
-
 import 'package:rpro_mini/data/vos/floor_vo.dart';
 import 'package:rpro_mini/data/vos/request/color_request_vo.dart';
 import 'package:rpro_mini/data/vos/request/product_request_vo.dart';
 import 'package:rpro_mini/network/responses/item_response.dart';
 import 'package:rpro_mini/network/responses/table_response.dart';
+import '../responses/add_response.dart';
 import '../responses/brand_response.dart';
 import '../responses/category_response.dart';
 import '../responses/login_response.dart';
@@ -18,7 +18,7 @@ abstract class ShoppyAdminAgent{
 
   Future<PostMethodResponse?> addBrand(String token,String name,String description,File? imageFile);
 
-  Future<BrandResponse?> getBrands(String token,);
+  Future<BrandResponse?> getBrands(String token);
 
   Future<PostMethodResponse?> updateBrandById(String token,int id,String name, String description, File? imageFile);
 
@@ -39,4 +39,6 @@ abstract class ShoppyAdminAgent{
   Future<ItemResponse> searchItemByName(String name);
 
   Future<OrderDetailsResponse> getOrderDetailsByTable(int tableId,int tableOrderValue);
+
+  Future<AddResponse> deleteOrderItem(int id);
 }
