@@ -64,7 +64,8 @@ class ScreenshotReceiptWidget extends StatelessWidget {
                       '($printerLocation Orders)',
                       style: const TextStyle(
                           color: Colors.black,
-                          fontSize: 8, fontWeight: FontWeight.w600),
+                          fontSize: 8,
+                          fontWeight: FontWeight.w600),
                     ),
                   ],
                 ),
