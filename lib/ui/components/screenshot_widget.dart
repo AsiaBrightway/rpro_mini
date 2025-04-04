@@ -14,6 +14,7 @@ class ScreenshotReceiptWidget extends StatelessWidget {
   final String empName;
   final String restaurantName;
   final ScreenshotController screenshotController;
+  final bool isCancel;
 
   const ScreenshotReceiptWidget({
     super.key,
@@ -25,7 +26,7 @@ class ScreenshotReceiptWidget extends StatelessWidget {
     required this.tableName,
     required this.groupName,
     required this.empName,
-    required this.restaurantName}
+    required this.restaurantName, required this.isCancel}
       );
 
   @override
@@ -44,38 +45,33 @@ class ScreenshotReceiptWidget extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  restaurantName,
-                  style: const TextStyle(color: Colors.black,fontSize: 10, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 8, top: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        '($printerLocation Orders)',
-                        style: const TextStyle(
-                          color: Colors.black,
-                            fontSize: 8, fontWeight: FontWeight.w600),
-                      ),
-                    ],
+                  padding: const EdgeInsets.only(bottom: 4.0),
+                  child: Text(
+                    isCancel ? 'Cancel Order' : restaurantName,
+                    style: const TextStyle(color: Colors.black,fontSize: 10, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
             ),
+            if(isCancel == false)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8, top: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '($printerLocation Orders)',
+                      style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 8, fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+              ),
             Row(
               children: [
                 Text(formattedDateTime, style: const TextStyle(fontSize: 9,color: Colors.black)),
-                const Text(
-                    '(700)',
-                    style: TextStyle(fontSize: 9,color: Colors.black)
-                )
               ],
             ),
             Row(
@@ -92,18 +88,19 @@ class ScreenshotReceiptWidget extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 4),
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
+            if(isCancel == false)
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
                   flex: 4,
                   child: Text(
                     "Name",
                     style: TextStyle(fontSize: 8, fontFamily: 'Ubuntu',color: Colors.black),
                   ),
                 ),
-                Expanded(
+                  Expanded(
                   flex: 2,
                   child: Text(
                     "Unit",
@@ -111,7 +108,7 @@ class ScreenshotReceiptWidget extends StatelessWidget {
                         fontSize: 8, fontWeight: FontWeight.w400, fontFamily: 'Ubuntu',color: Colors.black),
                   ),
                 ),
-                Expanded(
+                  Expanded(
                   flex: 2,
                   child: Text(
                     "Qty",
@@ -119,7 +116,7 @@ class ScreenshotReceiptWidget extends StatelessWidget {
                         fontSize: 8, fontWeight: FontWeight.w400, fontFamily: 'Ubuntu',color: Colors.black),
                   ),
                 ),
-                Expanded(
+                  Expanded(
                   flex: 3,
                   child: Text(
                     "Remark",
@@ -141,7 +138,29 @@ class ScreenshotReceiptWidget extends StatelessWidget {
                   physics: const ScrollPhysics(),
                   itemCount: items.length,
                   itemBuilder: (context, index) {
-                    return Row(
+                    return (isCancel)
+                        ? Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            items[index].quantity.toString(),
+                            style: TextStyle(fontSize: textSize + 1, fontWeight: FontWeight.w700,color: Colors.black),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 10,
+                          child: Text(
+                            maxLines: 2,
+                            items[index].itemName,
+                            style: TextStyle(fontSize: textSize,color: Colors.black),
+                          ),
+                        ),
+                      ],
+                    )
+                        : Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -157,7 +176,7 @@ class ScreenshotReceiptWidget extends StatelessWidget {
                           flex: 2,
                           child: Text(
                             items[index].unitName ?? '',
-                            style: TextStyle(fontSize: textSize, fontWeight: FontWeight.w400,color: Colors.black),
+                            style: TextStyle(fontSize: textSize,fontWeight: FontWeight.normal,color: Colors.black),
                           ),
                         ),
                         Expanded(

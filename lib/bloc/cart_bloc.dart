@@ -95,7 +95,7 @@ class CartBloc extends ChangeNotifier{
     }
   }
 
-  Future<void> removeItem(OrderDetailsVo item,BuildContext context) async{
+  Future<void> removeItem(OrderDetailsVo item,BuildContext context,VoidCallback onSuccess) async{
     if(item.orderId == 0){
       newOrderItems.removeWhere((i) => i.itemId == item.itemId && i.isOrdered == 0);
       combinedOrderItems = [..._orderDetailsList, ...newOrderItems];
@@ -104,6 +104,7 @@ class CartBloc extends ChangeNotifier{
       _model.deleteOrderItem(item.orderDetailsId).then((onValue){
         showSuccessToast(context, onValue.message.toString());
         getOrderDetails();
+        onSuccess();
       }).catchError((onError){
         showScaffoldMessage(context, 'Unable to delete. Check connection');
       });

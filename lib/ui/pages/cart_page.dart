@@ -1,12 +1,14 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:rpro_mini/bloc/cart_bloc.dart';
 import 'package:rpro_mini/data/vos/order_details_vo.dart';
 import 'package:rpro_mini/ui/components/item_cart.dart';
 import 'package:rpro_mini/ui/pages/setting_page.dart';
 import 'package:rpro_mini/ui/themes/colors.dart';
+import 'package:rpro_mini/utils/helper_functions.dart';
 import '../../bloc/add_order_bloc.dart';
 import '../../bloc/auth_provider.dart';
 
@@ -24,6 +26,7 @@ class CartPage extends StatefulWidget {
 
 class _CartPageState extends State<CartPage> {
   String baseUrl = "";
+  String empName = "";
 
   @override
   void initState() {
@@ -34,6 +37,7 @@ class _CartPageState extends State<CartPage> {
   Future<void> _initializeData() async{
     final authModel = Provider.of<AuthProvider>(context,listen: false);
     baseUrl = authModel.url;
+    empName = authModel.empName;
   }
 
   void _onBackPressed(){
@@ -65,7 +69,20 @@ class _CartPageState extends State<CartPage> {
 
     if (shouldDelete == true) {
       if(mounted) {
-        bloc.removeItem(item,context); // Call your BLoC delete method
+        bloc.removeItem(item,context,(){
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      SettingPage(
+                          orderItems: [item],
+                          tableName: widget.tableName,
+                          floorName: widget.floorName,
+                          groupName: widget.group.toString(),
+                          isCancel: true,)
+              )
+          );
+        });
       }
     }
   }
@@ -268,6 +285,16 @@ class _CartPageState extends State<CartPage> {
                                     ),
                                     child: TextButton(
                                         onPressed:(){
+                                          if(bloc.newOrderItems.isEmpty){
+                                            Fluttertoast.showToast(
+                                                msg: 'Empty Item',
+                                                toastLength: Toast.LENGTH_SHORT,
+                                                gravity: ToastGravity.BOTTOM,
+                                                backgroundColor: Colors.blueGrey.shade800,
+                                                textColor: Colors.white
+                                            );
+                                           return;
+                                          }
                                           Navigator.push(
                                               context,
                                               MaterialPageRoute(
@@ -276,7 +303,8 @@ class _CartPageState extends State<CartPage> {
                                                         orderItems: bloc.newOrderItems,
                                                         tableName: widget.tableName,
                                                         floorName: widget.floorName,
-                                                        groupName: widget.group.toString())
+                                                        groupName: widget.group.toString(),
+                                                        isCancel: false,)
                                               )
                                           );
                                         },

@@ -2,7 +2,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:esc_pos_utils_plus/esc_pos_utils_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -26,11 +25,12 @@ import '../../data/vos/order_details_vo.dart';
 import '../../utils/helper_functions.dart';
 
 class SettingPage extends StatefulWidget {
+  final bool isCancel;
   final List<OrderDetailsVo> orderItems;
   final String tableName;
   final String floorName;
   final String groupName;
-  const SettingPage({super.key, required this.orderItems, required this.tableName, required this.floorName, required this.groupName});
+  const SettingPage({super.key, required this.orderItems, required this.tableName, required this.floorName, required this.groupName, required this.isCancel});
 
   @override
   State<SettingPage> createState() => _SettingPageState();
@@ -79,6 +79,7 @@ class _SettingPageState extends State<SettingPage> {
       });
     }
     else {
+      if(!mounted) return;
       showToastMessage(context, 'Printer config is empty');
     }
   }
@@ -193,7 +194,7 @@ class _SettingPageState extends State<SettingPage> {
       }
       final resizedImage = copyResize(image,width: 576);  // 80mm printers
       bytes += generator.imageRaster(resizedImage);
-      bytes += generator.hr();
+      bytes += generator.hr(ch: '- -');
       bool success = await PrintBluetoothThermal.writeBytes(bytes);
       if (success) {
         bloc.changePrintState(config.name, 2);
@@ -250,38 +251,52 @@ class _SettingPageState extends State<SettingPage> {
 
   List<int> _generateReceiptHeader(Generator generator, String printerName) {
     List<int> bytes = [];
-    bytes.addAll(generator.text(
-      restaurantName,
-      styles: const PosStyles(
-        align: PosAlign.center,
-        bold: true,
-        height: PosTextSize.size1,
-        width: PosTextSize.size1,
-      ),
-    ));
-
-    bytes.addAll(generator.text(
-      '($printerName Orders)',
-      styles: const PosStyles(
-        align: PosAlign.center,
-        bold: true,
-        height: PosTextSize.size1,
-        width: PosTextSize.size1,
-      ),
-    ));
+    if(widget.isCancel){
+      bytes.addAll(generator.text(
+        "Cancel Order",
+        styles: const PosStyles(
+          bold: true,
+          align: PosAlign.center,
+          height: PosTextSize.size1,
+          width: PosTextSize.size1,
+        ),
+      ));
+    }else{
+      bytes.addAll(generator.text(
+        restaurantName,
+        styles: const PosStyles(
+          align: PosAlign.center,
+          bold: true,
+          height: PosTextSize.size1,
+          width: PosTextSize.size1,
+        ),
+      ));
+    }
+    bytes += generator.feed(1);
+    if(widget.isCancel == false){
+      bytes.addAll(generator.text(
+        '($printerName Orders)',
+        styles: const PosStyles(
+          align: PosAlign.center,
+          bold: true,
+          height: PosTextSize.size1,
+          width: PosTextSize.size1,
+        ),
+      ));
+    }
     bytes.addAll(generator.text(formattedDateTime));
     bytes.addAll(generator.text('${widget.floorName}, ${widget.tableName}, ${widget.groupName}'));
     bytes.addAll(generator.text(empName));
     bytes.addAll(generator.hr());
 
-    // Table Header
-    bytes.addAll(generator.row([
-      PosColumn(text: 'Name', width: 4, styles: _defaultStyle(PosAlign.left)),
-      PosColumn(text: 'Unit', width: 2, styles: _defaultStyle(PosAlign.center)),
-      PosColumn(text: 'Qty', width: 2, styles: _defaultStyle(PosAlign.center)),
-      PosColumn(text: 'Remark', width: 4, styles: _defaultStyle(PosAlign.right)),
-    ]));
-
+    if(widget.isCancel == false){
+      bytes.addAll(generator.row([
+        PosColumn(text: 'Name', width: 4, styles: _defaultStyle(PosAlign.left)),
+        PosColumn(text: 'Unit', width: 2, styles: _defaultStyle(PosAlign.center)),
+        PosColumn(text: 'Qty', width: 2, styles: _defaultStyle(PosAlign.center)),
+        PosColumn(text: 'Remark', width: 4, styles: _defaultStyle(PosAlign.right)),
+      ]));
+    }
     return bytes;
   }
 
@@ -325,7 +340,9 @@ class _SettingPageState extends State<SettingPage> {
         return Scaffold(
             backgroundColor: Theme.of(context).colorScheme.primaryContainer,
             appBar: AppBar(
-              title: const Text('Setting Page',style: TextStyle(color: Colors.white)),
+              title: Text(
+                  widget.isCancel ? 'Order Cancel': 'New Order',
+                  style: const TextStyle(color: Colors.white)),
               centerTitle: true,
               backgroundColor: AppColors.colorPrimary,
               leading: IconButton(
@@ -400,6 +417,7 @@ class _SettingPageState extends State<SettingPage> {
                             groupName: widget.groupName,
                             empName: empName,
                             restaurantName: restaurantName,
+                            isCancel: widget.isCancel,
                           ),
                           Selector<PrintReceiptBloc,int>(
                               selector: (context,bloc) => bloc.kitchenSuccess,
@@ -441,7 +459,9 @@ class _SettingPageState extends State<SettingPage> {
                             floorName: widget.floorName,
                             tableName: widget.tableName,
                             groupName: widget.groupName,
-                            empName: empName, restaurantName: '',
+                            empName: empName,
+                            restaurantName: restaurantName,
+                            isCancel: widget.isCancel,
                           ),
                           Selector<PrintReceiptBloc,int>(
                               selector: (context,bloc) => bloc.bbqSuccess,
@@ -485,6 +505,7 @@ class _SettingPageState extends State<SettingPage> {
                             groupName: widget.groupName,
                             empName: empName,
                             restaurantName: restaurantName,
+                            isCancel: widget.isCancel,
                           ),
                           Selector<PrintReceiptBloc,int>(
                               selector: (context,bloc) => bloc.barSuccess,
@@ -527,6 +548,7 @@ class _SettingPageState extends State<SettingPage> {
                             groupName: widget.groupName,
                             empName: empName,
                             restaurantName: restaurantName,
+                            isCancel: widget.isCancel,
                           ),
                           Selector<PrintReceiptBloc,int>(
                               selector: (context,bloc) => bloc.counterSuccess,
@@ -555,7 +577,25 @@ class _SettingPageState extends State<SettingPage> {
 
                     const SizedBox(height: 16),
 
-                    Selector<PrintReceiptBloc,bool>(
+                    (widget.isCancel)
+                        ? SizedBox(
+                            width: 200,
+                            child: ElevatedButton.icon(
+                                onPressed: () async {
+                                  _captureAndPrintOrders(widget.orderItems, bloc);
+                                },
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.blue,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8))),
+                                icon: const Icon(
+                                  Icons.print_outlined,
+                                  color: Colors.white70,
+                                ),
+                                label: const Text('Print Order Cancel',
+                                    style: TextStyle(color: Colors.white))),
+                          )
+                        : Selector<PrintReceiptBloc,bool>(
                         selector: (context,bloc) => bloc.isClickedPrintAll,
                         builder: (context,isClicked,_){
                           if(isClicked == false){
