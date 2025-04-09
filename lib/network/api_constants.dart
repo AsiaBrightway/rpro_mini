@@ -15,6 +15,7 @@ const String kEndPointItem = "/api/getitemsbycategory";
 const String kEndPointSearchName = "/api/getItemBySearchKey";
 const String kEndPointGetOrder = "/api/getorder";
 const String kEndPointDeleteOrder = "/api/deleteorderitem";
+const String kEndPointAddOrder = "/api/addorderitem";
 
 const String NETWORK = 'Network';
 const String BLUETOOTH = 'Bluetooth';

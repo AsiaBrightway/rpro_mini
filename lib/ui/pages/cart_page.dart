@@ -78,8 +78,9 @@ class _CartPageState extends State<CartPage> {
                           orderItems: [item],
                           tableName: widget.tableName,
                           floorName: widget.floorName,
-                          groupName: widget.group.toString(),
-                          isCancel: true,)
+                          groupName: widget.group,
+                          isCancel: true,
+                          tableId: widget.tableId,)
               )
           );
         });
@@ -301,9 +302,10 @@ class _CartPageState extends State<CartPage> {
                                                   builder: (context) =>
                                                       SettingPage(
                                                         orderItems: bloc.newOrderItems,
+                                                        tableId: widget.tableId,
                                                         tableName: widget.tableName,
                                                         floorName: widget.floorName,
-                                                        groupName: widget.group.toString(),
+                                                        groupName: widget.group,
                                                         isCancel: false,)
                                               )
                                           );

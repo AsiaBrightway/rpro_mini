@@ -16,6 +16,7 @@ import 'package:rpro_mini/bloc/print_receipt_bloc.dart';
 import 'package:rpro_mini/data/vos/printer_config.dart';
 import 'package:rpro_mini/network/api_constants.dart';
 import 'package:rpro_mini/ui/components/screenshot_widget.dart';
+import 'package:rpro_mini/ui/pages/home_page.dart';
 import 'package:rpro_mini/ui/themes/colors.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -27,10 +28,11 @@ import '../../utils/helper_functions.dart';
 class SettingPage extends StatefulWidget {
   final bool isCancel;
   final List<OrderDetailsVo> orderItems;
+  final int tableId;
   final String tableName;
   final String floorName;
-  final String groupName;
-  const SettingPage({super.key, required this.orderItems, required this.tableName, required this.floorName, required this.groupName, required this.isCancel});
+  final int groupName;
+  const SettingPage({super.key, required this.orderItems, required this.tableName, required this.floorName, required this.groupName, required this.isCancel, required this.tableId});
 
   @override
   State<SettingPage> createState() => _SettingPageState();
@@ -62,7 +64,6 @@ class _SettingPageState extends State<SettingPage> {
     _loadPrinterConfig();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _printerService = context.read<PrinterService>();
-      _printerService?.getPairedDevices();
     });
 
     final authModel = Provider.of<AuthProvider>(context,listen: false);
@@ -92,16 +93,16 @@ class _SettingPageState extends State<SettingPage> {
       for (var item in orderItems) {
         switch (item.mainCategoryId) {
           case 3:
-            imageFutures.add(screenshotControllerBar.capture(delay: const Duration(milliseconds: 100)));
+            imageFutures.add(screenshotControllerBar.capture(delay: const Duration(milliseconds: 150)));
             break;
           case 1:
-            imageFutures.add(screenshotControllerKitchen.capture(delay: const Duration(milliseconds: 100)));
+            imageFutures.add(screenshotControllerKitchen.capture(delay: const Duration(milliseconds: 150)));
             break;
           case 2:
-            imageFutures.add(screenshotControllerBBQ.capture(delay: const Duration(milliseconds: 100)));
+            imageFutures.add(screenshotControllerBBQ.capture(delay: const Duration(milliseconds: 150)));
             break;
           case 4:
-            imageFutures.add(screenshotControllerCounter.capture(delay: const Duration(milliseconds: 100)));
+            imageFutures.add(screenshotControllerCounter.capture(delay: const Duration(milliseconds: 150)));
             break;
           default:
           // Handle any other cases or show an error
@@ -287,8 +288,7 @@ class _SettingPageState extends State<SettingPage> {
     bytes.addAll(generator.text(formattedDateTime));
     bytes.addAll(generator.text('${widget.floorName}, ${widget.tableName}, ${widget.groupName}'));
     bytes.addAll(generator.text(empName));
-    bytes.addAll(generator.hr());
-
+    bytes += generator.feed(1);
     if(widget.isCancel == false){
       bytes.addAll(generator.row([
         PosColumn(text: 'Name', width: 4, styles: _defaultStyle(PosAlign.left)),
@@ -314,7 +314,6 @@ class _SettingPageState extends State<SettingPage> {
 
     if (await Permission.bluetoothScan.isDenied ||
         await Permission.bluetoothConnect.isDenied) {
-      await Permission.bluetoothScan.request();
       await Permission.bluetoothConnect.request();
     }
 
@@ -334,7 +333,7 @@ class _SettingPageState extends State<SettingPage> {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => PrintReceiptBloc(),
+      create: (context) => PrintReceiptBloc(widget.tableId,widget.groupName,widget.orderItems),
       builder: (context,child){
         var bloc = context.read<PrintReceiptBloc>();
         return Scaffold(
@@ -370,261 +369,306 @@ class _SettingPageState extends State<SettingPage> {
             body: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Selector<PrintReceiptBloc,OrderState>(
-                        selector: (context,bloc) => bloc.orderState,
-                        builder: (context,orderState,_){
-                          if(orderState == OrderState.loading){
-                            return const Padding(
-                              padding: EdgeInsets.all(18),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  CupertinoActivityIndicator(),
-                                  SizedBox(width: 8),
-                                  Text('Uploading')
-                                ],
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Selector<PrintReceiptBloc,OrderState>(
+                            selector: (context,bloc) => bloc.orderState,
+                            builder: (context,orderState,_){
+                              if(orderState == OrderState.loading){
+                                return const Padding(
+                                  padding: EdgeInsets.all(18),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      CupertinoActivityIndicator(),
+                                      SizedBox(width: 8),
+                                      Text('Uploading')
+                                    ],
+                                  ),
+                                );
+                              }else if(orderState == OrderState.success){
+                                return const OrderStateWidget(isSuccess: true,tryAgain: null);
+                              }
+                              else if(orderState == OrderState.error){
+                                return OrderStateWidget(
+                                    isSuccess: false,
+                                    tryAgain: (){
+                                      bloc.sendOrderToServer();
+                                    });
+                              }else{
+                                return const SizedBox(height: 16);
+                              }
+                            }),
+                        const SizedBox(height: 16,),
+                        /// Kitchen Order Screenshot Widget
+                        if (widget.orderItems.any((item) => item.mainCategoryId == 1))
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ScreenshotReceiptWidget(
+                                items: widget.orderItems.where((item) => item.mainCategoryId == 1).toList(),
+                                screenshotController: screenshotControllerKitchen, // Controller for Kitchen
+                                textSize: printers[1].textSize.toDouble(),
+                                printerLocation: KITCHEN,
+                                floorName: widget.floorName,
+                                tableName: widget.tableName,
+                                groupName: widget.groupName.toString(),
+                                empName: empName,
+                                restaurantName: restaurantName,
+                                isCancel: widget.isCancel,
                               ),
-                            );
-                          }else if(orderState == OrderState.success){
-                            return const OrderStateWidget(isSuccess: true,tryAgain: null);
-                          }
-                          else if(orderState == OrderState.error){
-                            return OrderStateWidget(
-                                isSuccess: false,
-                                tryAgain: (){
-                                  bloc.sendOrderToServer();
-                                });
-                          }else{
-                            return const SizedBox(height: 16);
-                          }
-                        }),
-                    const SizedBox(height: 16,),
-                    /// Kitchen Order Screenshot Widget
-                    if (widget.orderItems.any((item) => item.mainCategoryId == 1))
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          ScreenshotReceiptWidget(
-                            items: widget.orderItems.where((item) => item.mainCategoryId == 1).toList(),
-                            screenshotController: screenshotControllerKitchen, // Controller for Kitchen
-                            textSize: 8,
-                            printerLocation: KITCHEN,
-                            floorName: widget.floorName,
-                            tableName: widget.tableName,
-                            groupName: widget.groupName,
-                            empName: empName,
-                            restaurantName: restaurantName,
-                            isCancel: widget.isCancel,
-                          ),
-                          Selector<PrintReceiptBloc,int>(
-                              selector: (context,bloc) => bloc.kitchenSuccess,
-                              builder: (context,kitchenState,_){
-                                if(kitchenState == 2){
-                                  return const SuccessCheckWidget();
-                                }
-                                else if(kitchenState == 3){
-                                  return IconButton(onPressed: (){
-                                    if(theKitchenImage == null) {
-                                      showToastMessage(context, 'Bar image is null');
-                                      return;
+                              Selector<PrintReceiptBloc,int>(
+                                  selector: (context,bloc) => bloc.kitchenSuccess,
+                                  builder: (context,kitchenState,_){
+                                    if(kitchenState == 2){
+                                      return const SuccessCheckWidget();
                                     }
-                                    _printOrder(1, theKitchenImage!,bloc);
-                                  }, icon: const Icon(Icons.refresh,color: Colors.grey,));
-                                }
-                                else if ( kitchenState == 1){
-                                  return const LoadingWidget();
-                                }
-                                else {
-                                  return const SizedBox(width: 1);
-                                }
-                              })
-                        ],
-                      ),
-
-                    const SizedBox(height: 16),
-
-                    /// BBQ Screenshot Widget,
-                    if (widget.orderItems.any((item) => item.mainCategoryId == 2))
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          ScreenshotReceiptWidget(
-                            items: widget.orderItems.where((item) => item.mainCategoryId == 2).toList(),
-                            screenshotController: screenshotControllerBBQ, // Controller for BBQ
-                            textSize: printers[2].textSize.toDouble(),
-                            printerLocation: BBQ,
-                            floorName: widget.floorName,
-                            tableName: widget.tableName,
-                            groupName: widget.groupName,
-                            empName: empName,
-                            restaurantName: restaurantName,
-                            isCancel: widget.isCancel,
-                          ),
-                          Selector<PrintReceiptBloc,int>(
-                              selector: (context,bloc) => bloc.bbqSuccess,
-                              builder: (context,bbqState,_){
-                                if(bbqState == 2){
-                                  return const SuccessCheckWidget();
-                                }
-                                else if(bbqState == 3){
-                                  return IconButton(onPressed: (){
-                                    if(theBBQImage == null) {
-                                      showToastMessage(context, 'Bar image is null');
-                                      return;
+                                    else if(kitchenState == 3){
+                                      return IconButton(onPressed: (){
+                                        if(theKitchenImage == null) {
+                                          showToastMessage(context, 'Bar image is null');
+                                          return;
+                                        }
+                                        _printOrder(1, theKitchenImage!,bloc);
+                                      }, icon: const Icon(Icons.refresh,color: Colors.grey,));
                                     }
-                                    _printOrder(2, theBBQImage!,bloc);
-                                  }, icon: const Icon(Icons.refresh,color: Colors.grey,));
-                                }
-                                else if(bbqState == 1){
-                                  return const LoadingWidget();
-                                }
-                                else{
-                                  return const SizedBox(width: 1);
-                                }
-                              })
-                        ],
-                      ),
-
-                    const SizedBox(height: 16),
-
-                    // Display the Bar Order Screenshot Widget only if it's in the orderItems
-                    if (widget.orderItems.any((item) => item.mainCategoryId == 3))
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          ScreenshotReceiptWidget(
-                            items: widget.orderItems.where((item) => item.mainCategoryId == 3).toList(),
-                            screenshotController: screenshotControllerBar, // Controller for Bar
-                            textSize: 14,
-                            printerLocation: BAR,
-                            floorName: widget.floorName,
-                            tableName: widget.tableName,
-                            groupName: widget.groupName,
-                            empName: empName,
-                            restaurantName: restaurantName,
-                            isCancel: widget.isCancel,
-                          ),
-                          Selector<PrintReceiptBloc,int>(
-                              selector: (context,bloc) => bloc.barSuccess,
-                              builder: (context,barState,_){
-                                if(barState == 2){
-                                  return const SuccessCheckWidget();
-                                }
-                                else if(barState == 3){
-                                  return IconButton(onPressed: (){
-                                    if(theBarImage == null) {
-                                      showToastMessage(context, 'Bar image is null');
-                                      return;
+                                    else if ( kitchenState == 1){
+                                      return const LoadingWidget();
                                     }
-                                    _printOrder(3, theBarImage!,bloc);
-                                  }, icon: const Icon(Icons.refresh,color: Colors.grey,));
-                                }
-                                else if(barState == 1){
-                                  return const LoadingWidget();
-                                }
-                                else{
-                                  return const SizedBox(width: 1,);
-                                }
-                              })
-                        ],
-                      ),
-
-                    const SizedBox(height: 16,),
-
-                    /// Counter Screenshot
-                    if (widget.orderItems.any((item) => item.mainCategoryId == 4))
-                      Row(
-                        children: [
-                          ScreenshotReceiptWidget(
-                            items: widget.orderItems.where((item) => item.mainCategoryId == 4).toList(),
-                            screenshotController: screenshotControllerCounter, // Controller for Counter
-                            textSize: 8,
-                            printerLocation: COUNTER,
-                            floorName: widget.floorName,
-                            tableName: widget.tableName,
-                            groupName: widget.groupName,
-                            empName: empName,
-                            restaurantName: restaurantName,
-                            isCancel: widget.isCancel,
-                          ),
-                          Selector<PrintReceiptBloc,int>(
-                              selector: (context,bloc) => bloc.counterSuccess,
-                              builder: (context,counterState,_){
-                                if(counterState == 2){
-                                  return const SuccessCheckWidget();
-                                }
-                                else if(counterState == 3){
-                                  return IconButton(onPressed: (){
-                                    if(theBarImage == null) {
-                                      showToastMessage(context, 'Bar image is null');
-                                      return;
+                                    else {
+                                      return const SizedBox(width: 1);
                                     }
-                                    _printOrder(4, theBarImage!,bloc);
-                                  }, icon: const Icon(Icons.refresh,color: Colors.grey,));
-                                }
-                                else if(counterState == 1){
-                                  return const LoadingWidget();
-                                }
-                                else{
-                                  return const SizedBox(width: 1);
-                                }
-                              })
-                        ],
-                      ),
+                                  })
+                            ],
+                          ),
 
-                    const SizedBox(height: 16),
+                        const SizedBox(height: 16),
 
-                    (widget.isCancel)
-                        ? SizedBox(
-                            width: 200,
-                            child: ElevatedButton.icon(
-                                onPressed: () async {
-                                  _captureAndPrintOrders(widget.orderItems, bloc);
+                        /// BBQ Screenshot Widget,
+                        if (widget.orderItems.any((item) => item.mainCategoryId == 2))
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ScreenshotReceiptWidget(
+                                items: widget.orderItems.where((item) => item.mainCategoryId == 2).toList(),
+                                screenshotController: screenshotControllerBBQ, // Controller for BBQ
+                                textSize: printers[1].textSize.toDouble(),
+                                printerLocation: BBQ,
+                                floorName: widget.floorName,
+                                tableName: widget.tableName,
+                                groupName: widget.groupName.toString(),
+                                empName: empName,
+                                restaurantName: restaurantName,
+                                isCancel: widget.isCancel,
+                              ),
+                              Selector<PrintReceiptBloc,int>(
+                                  selector: (context,bloc) => bloc.bbqSuccess,
+                                  builder: (context,bbqState,_){
+                                    if(bbqState == 2){
+                                      return const SuccessCheckWidget();
+                                    }
+                                    else if(bbqState == 3){
+                                      return IconButton(onPressed: (){
+                                        if(theBBQImage == null) {
+                                          showToastMessage(context, 'BBQ image is null');
+                                          return;
+                                        }
+                                        _printOrder(2, theBBQImage!,bloc);
+                                      }, icon: const Icon(Icons.refresh,color: Colors.grey,));
+                                    }
+                                    else if(bbqState == 1){
+                                      return const LoadingWidget();
+                                    }
+                                    else{
+                                      return const SizedBox(width: 1);
+                                    }
+                                  })
+                            ],
+                          ),
+
+                        const SizedBox(height: 16),
+
+                        // Display the Bar Order Screenshot Widget only if it's in the orderItems
+                        if (widget.orderItems.any((item) => item.mainCategoryId == 3))
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ScreenshotReceiptWidget(
+                                items: widget.orderItems.where((item) => item.mainCategoryId == 3).toList(),
+                                screenshotController: screenshotControllerBar, // Controller for Bar
+                                textSize: printers[2].textSize.toDouble(),
+                                printerLocation: BAR,
+                                floorName: widget.floorName,
+                                tableName: widget.tableName,
+                                groupName: widget.groupName.toString(),
+                                empName: empName,
+                                restaurantName: restaurantName,
+                                isCancel: widget.isCancel,
+                              ),
+                              Selector<PrintReceiptBloc,int>(
+                                  selector: (context,bloc) => bloc.barSuccess,
+                                  builder: (context,barState,_){
+                                    if(barState == 2){
+                                      return const SuccessCheckWidget();
+                                    }
+                                    else if(barState == 3){
+                                      return IconButton(onPressed: (){
+                                        if(theBarImage == null) {
+                                          showToastMessage(context, 'Bar image is null');
+                                          return;
+                                        }
+                                        _printOrder(3, theBarImage!,bloc);
+                                      }, icon: const Icon(Icons.refresh,color: Colors.grey,));
+                                    }
+                                    else if(barState == 1){
+                                      return const LoadingWidget();
+                                    }
+                                    else{
+                                      return const SizedBox(width: 1,);
+                                    }
+                                  })
+                            ],
+                          ),
+
+                        const SizedBox(height: 16,),
+
+                        /// Counter Screenshot
+                        if (widget.orderItems.any((item) => item.mainCategoryId == 4))
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ScreenshotReceiptWidget(
+                                items: widget.orderItems.where((item) => item.mainCategoryId == 4).toList(),
+                                screenshotController: screenshotControllerCounter, // Controller for Counter
+                                textSize: printers[3].textSize.toDouble(),
+                                printerLocation: COUNTER,
+                                floorName: widget.floorName,
+                                tableName: widget.tableName,
+                                groupName: widget.groupName.toString(),
+                                empName: empName,
+                                restaurantName: restaurantName,
+                                isCancel: widget.isCancel,
+                              ),
+                              Selector<PrintReceiptBloc,int>(
+                                  selector: (context,bloc) => bloc.counterSuccess,
+                                  builder: (context,counterState,_){
+                                    if(counterState == 2){
+                                      return const SuccessCheckWidget();
+                                    }
+                                    else if(counterState == 3){
+                                      return IconButton(onPressed: (){
+                                        if(theBarImage == null) {
+                                          showToastMessage(context, 'Bar image is null');
+                                          return;
+                                        }
+                                        _printOrder(4, theBarImage!,bloc);
+                                      }, icon: const Icon(Icons.refresh,color: Colors.grey,));
+                                    }
+                                    else if(counterState == 1){
+                                      return const LoadingWidget();
+                                    }
+                                    else{
+                                      return const SizedBox(width: 1);
+                                    }
+                                  })
+                            ],
+                          ),
+
+                        const SizedBox(height: 16),
+
+                        (widget.isCancel)
+                            ? Selector<PrintReceiptBloc,bool>(
+                                selector: (context,bloc) => bloc.clickedCancelPrint,
+                                builder: (context,clicked,_){
+                                  if(clicked){
+                                    return const SizedBox();
+                                  }else{
+                                    return SizedBox(
+                                      width: 200,
+                                      child: ElevatedButton.icon(
+                                          onPressed: () async {
+                                            bloc.clickedCancelPrint = true;
+                                            _captureAndPrintOrders(widget.orderItems, bloc);
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.blue,
+                                              shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(8))),
+                                          icon: const Icon(
+                                            Icons.print_outlined,
+                                            color: Colors.white70,
+                                          ),
+                                          label: const Text('Print Order Cancel',
+                                              style: TextStyle(color: Colors.white))),
+                                    );
+                                  }
                                 },
-                                style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.blue,
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8))),
-                                icon: const Icon(
-                                  Icons.print_outlined,
-                                  color: Colors.white70,
-                                ),
-                                label: const Text('Print Order Cancel',
-                                    style: TextStyle(color: Colors.white))),
-                          )
-                        : Selector<PrintReceiptBloc,bool>(
-                        selector: (context,bloc) => bloc.isClickedPrintAll,
-                        builder: (context,isClicked,_){
-                          if(isClicked == false){
-                            return SizedBox(
-                              width: 200,
-                              child: ElevatedButton.icon(
-                                  onPressed: () async{
-                                    bloc.sendOrderToServer();
-                                    _captureAndPrintOrders(widget.orderItems,bloc);
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.blue,
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(8)
-                                      )
-                                  ),
-                                  icon: const Icon(
-                                    Icons.print,
-                                    color: Colors.white70,
-                                  ),
-                                  label: const Text('Print All',style: TextStyle(color: Colors.white))),
-                            );
-                          }
-                          else{
-                            return const SizedBox(width: 1);
-                          }
-                        }),
-                  ],
+                                )
+                            : Selector<PrintReceiptBloc,bool>(
+                            selector: (context,bloc) => bloc.isClickedPrintAll,
+                            builder: (context,isClicked,_){
+                              if(isClicked == false){
+                                return SizedBox(
+                                  width: 200,
+                                  child: ElevatedButton.icon(
+                                      onPressed: () async{
+                                        bloc.sendOrderToServer();
+                                        _captureAndPrintOrders(widget.orderItems,bloc);
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.blue,
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(8)
+                                          )
+                                      ),
+                                      icon: const Icon(
+                                        Icons.print,
+                                        color: Colors.white70,
+                                      ),
+                                      label: const Text('Print All',style: TextStyle(color: Colors.white))),
+                                );
+                              }
+                              else{
+                                return const SizedBox(width: 1);
+                              }
+                            }),
+                      ],
+                    ),
+                  ),
                 ),
+                Selector<PrintReceiptBloc,OrderState>(
+                  selector: (context,bloc) => bloc.orderState,
+                  builder: (context,orderState,_){
+                    if(orderState == OrderState.success){
+                      return Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: ElevatedButton(
+                          onPressed:(){
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(builder: (context) => const HomePage()),
+                                  (route) => false,
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            elevation: 5,
+                            minimumSize: const Size(double.infinity, 48),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text('Navigate to Main'),
+                        ),
+                      );
+                    }
+                    else{
+                      return const SizedBox(height: 1);
+                    }
+                  },
+                )
               ],
             )
         );
@@ -668,14 +712,18 @@ class OrderStateWidget extends StatelessWidget{
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Column(
         children: [
-          isSuccess
-              ? const Icon(Icons.check_circle,color: Colors.green,)
-              : IconButton(onPressed: tryAgain, icon: const Icon(Icons.refresh,color: Colors.grey,)),
-          const SizedBox(width: 8,),
-          Text( isSuccess ? 'New Order Added': 'Check Your Connection!',)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              isSuccess
+                  ? const Icon(Icons.check_circle,color: Colors.green,)
+                  : IconButton(onPressed: tryAgain, icon: const Icon(Icons.refresh,color: Colors.grey,)),
+              const SizedBox(width: 8,),
+              Text( isSuccess ? 'New Order Added': 'Check Your Connection!')
+            ],
+          ),
         ],
       ),
     );

@@ -50,13 +50,22 @@ class _FlyingItemAnimationState extends State<FlyingItemAnimation> with SingleTi
           top: _animation.value.dy,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(6),
-            child: CachedNetworkImage(
-              width: 40,
-              height: 40,
-              imageUrl: 'http://rproplus.asiabrightway.com/storage/Images/6731845646151_tiger.jpg',
-              fit: BoxFit.cover, // Fill the space while maintaining aspect ratio
-              errorWidget: (context, url, error) => const Icon(Icons.error, color: Colors.purple), // Error handling
-            ),
+            child: widget.image.isEmpty
+                ? Container(
+                    // Fallback widget (e.g., a colored box with an icon)
+                    width: 40,
+                    height: 40,
+                    color: Colors.grey[300],
+                    child: const Icon(Icons.image, color: Colors.purple),
+                  )
+                : CachedNetworkImage(
+                    width: 40,
+                    height: 40,
+                    imageUrl: widget.image,
+                    fit: BoxFit.cover,
+                    placeholder: (context,url) => const Icon(Icons.image, color: Colors.grey,size: 40),
+                    errorWidget: (context, url, error) => const Icon(Icons.image, color: Colors.grey,size: 40),
+                  ),
           ), // Adjust the item image
         );
       },

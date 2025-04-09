@@ -3,8 +3,8 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:rpro_mini/data/vos/floor_vo.dart';
-import 'package:rpro_mini/data/vos/request/color_request_vo.dart';
-import 'package:rpro_mini/data/vos/request/product_request_vo.dart';
+import 'package:rpro_mini/data/vos/request/add_order_item_request.dart';
+import 'package:rpro_mini/data/vos/request/add_order_request.dart';
 import 'package:rpro_mini/network/data_agents/shoppy_admin_agent.dart';
 import 'package:rpro_mini/network/responses/add_response.dart';
 import 'package:rpro_mini/network/responses/brand_response.dart';
@@ -93,14 +93,6 @@ class ShoppyAdminAgentImpl extends ShoppyAdminAgent{
     }
   }
 
-
-  @override
-  Future<PostMethodResponse?> updateColor(String token,int id,ColorRequestVo request) {
-    return shoppyApi.updateColorById(token, id, request).catchError((onError){
-      throw _createException(onError);
-    });
-  }
-
   @override
   Future<PostMethodResponse?> addBrand(String token,String name, String description, File? imageFile) async{
     final Map<String, dynamic> data = {
@@ -160,23 +152,8 @@ class ShoppyAdminAgentImpl extends ShoppyAdminAgent{
   }
 
   @override
-  Future<PostMethodResponse?> addNewProduct(String token,ProductRequestVo body) {
-    return shoppyApi.addNewProduct(token,body).catchError((onError){
-      throw _createException(onError);
-
-    });
-  }
-
-  @override
   Future<LoginResponse?> adminLogin(String name, String password) {
     return shoppyApi.adminLogin(name,password).catchError((onError){
-      throw _createException(onError);
-    });
-  }
-
-  @override
-  Future<PostMethodResponse?> updateProductById(String token, int id, ProductRequestVo body) {
-    return shoppyApi.updateProductById(token, id, body).catchError((onError){
       throw _createException(onError);
     });
   }
@@ -219,6 +196,13 @@ class ShoppyAdminAgentImpl extends ShoppyAdminAgent{
   @override
   Future<AddResponse> deleteOrderItem(int id) {
     return shoppyApi.deleteOrderItem(id).catchError((onError){
+      throw _createException(onError);
+    });
+  }
+
+  @override
+  Future<PostMethodResponse> addOrderItem(AddOrderRequest request) {
+    return shoppyApi.addNewOrder(request).catchError((onError){
       throw _createException(onError);
     });
   }

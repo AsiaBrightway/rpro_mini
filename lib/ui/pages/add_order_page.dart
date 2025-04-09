@@ -59,7 +59,7 @@ class _AddOrderPageState extends State<AddOrderPage> {
     super.dispose();
   }
 
-  void _animateToCart(BuildContext context, GlobalKey itemKey,AddOrderBloc bloc,int itemId) {
+  void _animateToCart(BuildContext context, GlobalKey itemKey,AddOrderBloc bloc,int itemId,String imageUrl) {
     final OverlayState overlayState = Overlay.of(context);
     final RenderBox itemBox = itemKey.currentContext!.findRenderObject() as RenderBox;
     final RenderBox cartBox = cartKey.currentContext!.findRenderObject() as RenderBox;
@@ -73,7 +73,7 @@ class _AddOrderPageState extends State<AddOrderPage> {
     overlayEntry = OverlayEntry(
       builder: (context) {
         return FlyingItemAnimation(
-          image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLRS75kXFbSnhLpwOzucGTZnBsr7XZxAZ-OQ&s',
+          image: '$baseUrl/storage/Images/$imageUrl',
           startPosition: itemPosition,
           endPosition: cartPosition,
           onComplete: () {
@@ -368,7 +368,7 @@ class _AddOrderPageState extends State<AddOrderPage> {
                                 return InkWell(
                                   key: _itemKeys[index],
                                   onTap: (){
-                                    _animateToCart(context, _itemKeys[index],bloc,itemList[index].itemId);
+                                    _animateToCart(context, _itemKeys[index],bloc,itemList[index].itemId,itemList[index].image ?? '');
                                     //Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingPage()));
                                   },
                                   child: Container(
@@ -468,7 +468,7 @@ class _AddOrderPageState extends State<AddOrderPage> {
             ),
             trailing: TextButton(
               onPressed: () {
-                _animateToCart(context, _itemKeys[index],bloc,itemList[index].itemId);
+                _animateToCart(context, _itemKeys[index],bloc,itemList[index].itemId,itemList[index].image ?? '');
               },
               child: Text("Add",style: TextStyle(color: Theme.of(context).colorScheme.secondary)),
             ),

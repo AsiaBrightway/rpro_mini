@@ -5,7 +5,7 @@ part 'post_method_response.g.dart';
 @JsonSerializable()
 class PostMethodResponse{
   @JsonKey(name: 'message')
-  final String message;
+  final String? message;
 
   PostMethodResponse(this.message);
 

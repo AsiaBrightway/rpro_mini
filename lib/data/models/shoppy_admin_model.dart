@@ -5,8 +5,7 @@ import 'package:rpro_mini/data/vos/brand_vo.dart';
 import 'package:rpro_mini/data/vos/category_vo.dart';
 import 'package:rpro_mini/data/vos/floor_vo.dart';
 import 'package:rpro_mini/data/vos/item_vo.dart';
-import 'package:rpro_mini/data/vos/request/color_request_vo.dart';
-import 'package:rpro_mini/data/vos/request/product_request_vo.dart';
+import 'package:rpro_mini/data/vos/request/add_order_request.dart';
 import 'package:rpro_mini/network/data_agents/shoppy_admin_agent.dart';
 import 'package:rpro_mini/network/data_agents/shoppy_admin_agent_impl.dart';
 import 'package:rpro_mini/network/responses/login_response.dart';
@@ -30,10 +29,6 @@ class ShoppyAdminModel{
     return mDataAgent.adminLogin(name, password);
   }
 
-  Future<PostMethodResponse?> updateColor(String token,int id,ColorRequestVo request){
-    return mDataAgent.updateColor(token, id, request);
-  }
-
   Future<PostMethodResponse?> addBrand(String token,String name,String description,File? image){
     return mDataAgent.addBrand(token, name, description, image);
   }
@@ -48,14 +43,6 @@ class ShoppyAdminModel{
 
   Future<List<CategoryVo>> getCategories(){
     return mDataAgent.getCategories().asStream().map((response) => response?.data ?? []).first;
-  }
-
-  Future<PostMethodResponse?> addNewProduct(String token,ProductRequestVo request){
-    return mDataAgent.addNewProduct(token,request);
-  }
- 
-  Future<PostMethodResponse?> updateProductById(String token,int id,ProductRequestVo request){
-    return mDataAgent.updateProductById(token, id, request);
   }
 
   Future<List<FloorVo>> getFloors(){
@@ -80,5 +67,9 @@ class ShoppyAdminModel{
 
   Future<AddResponse> deleteOrderItem(int id){
     return mDataAgent.deleteOrderItem(id);
+  }
+
+  Future<PostMethodResponse> addOrderItem(AddOrderRequest request){
+    return mDataAgent.addOrderItem(request);
   }
 }

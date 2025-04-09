@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:retrofit/http.dart';
 import 'package:rpro_mini/data/vos/floor_vo.dart';
+import 'package:rpro_mini/data/vos/request/add_order_request.dart';
 import 'package:rpro_mini/network/responses/add_response.dart';
 import 'package:rpro_mini/network/responses/brand_response.dart';
 import 'package:rpro_mini/network/responses/category_response.dart';
@@ -10,29 +11,15 @@ import 'package:rpro_mini/network/responses/order_details_response.dart';
 import 'package:rpro_mini/network/responses/parse_error_logger.dart';
 import 'package:rpro_mini/network/responses/post_method_response.dart';
 import 'package:rpro_mini/network/responses/table_response.dart';
-import '../data/vos/request/color_request_vo.dart';
-import '../data/vos/request/product_request_vo.dart';
+import '../data/vos/request/add_order_item_request.dart';
 import 'api_constants.dart';
+
 part 'shoppy_api.g.dart';
 
 @RestApi()
 abstract class ShoppyApi{
 
   factory ShoppyApi(Dio dio) = _ShoppyApi;
-
-  @POST("{url}$kEndPointBrands")
-  Future<PostMethodResponse?> addColor(
-      @Header(kParamAuthorization) String apiKey,
-      @Path("url") String url,
-      @Body() ColorRequestVo requestBody
-      );
-
-  @PUT("$kEndPointColors/{id}")
-  Future<PostMethodResponse?> updateColorById(
-      @Header(kParamAuthorization) String apiKey,
-      @Path() int id,
-      @Body() ColorRequestVo requestBody
-      );
 
   @POST(kEndPointBrands)
   @MultiPart()
@@ -54,19 +41,6 @@ abstract class ShoppyApi{
 
   @GET(kEndPointCategory)
   Future<CategoryResponse?> getCategories();
-
-  @POST(kEndPointProducts)
-  Future<PostMethodResponse?> addNewProduct(
-      @Header(kParamAuthorization) String apiKey,
-      @Body() ProductRequestVo body
-      );
-
-  @PUT("$kEndPointProducts/{id}")
-  Future<PostMethodResponse?> updateProductById(
-      @Header(kParamAuthorization) String apiKey,
-      @Path("id") int id,
-      @Body() ProductRequestVo body
-      );
 
   @POST(kEndPointAdminAuth)
   Future<LoginResponse?> adminLogin(
@@ -101,5 +75,10 @@ abstract class ShoppyApi{
   @DELETE("$kEndPointDeleteOrder/{id}")
   Future<AddResponse> deleteOrderItem(
       @Path("id") int id,
+      );
+
+  @POST(kEndPointAddOrder)
+  Future<PostMethodResponse> addNewOrder(
+      @Body() AddOrderRequest requestBody
       );
 }

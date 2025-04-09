@@ -173,6 +173,7 @@ class ScreenshotReceiptWidget extends StatelessWidget {
                             style: TextStyle(fontSize: textSize,color: Colors.black),
                           ),
                         ),
+                        const SizedBox(width: 2),
                         Expanded(
                           flex: 2,
                           child: Text(

@@ -1,10 +1,13 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:rpro_mini/data/models/shoppy_admin_model.dart';
+import 'package:rpro_mini/data/vos/request/add_order_item_request.dart';
+import 'package:rpro_mini/data/vos/request/add_order_request.dart';
+import '../data/vos/order_details_vo.dart';
 import '../network/api_constants.dart';
 
 enum OrderState { initial, loading, success, error }
-
 class PrintReceiptBloc extends ChangeNotifier{
   /// 0 is initial ,
   /// 1 is loading ,
@@ -15,14 +18,27 @@ class PrintReceiptBloc extends ChangeNotifier{
   int _barSuccess = 0;
   int _counterSuccess = 0;
   bool _isClickedPrintAll = false;
+  int _tableId = 0;
+  int _orderNumberValue = 0;
+  bool _clickedCancelPrint = false;
+  List<OrderDetailsVo> _orderItems = [];
   OrderState _orderState = OrderState.initial;
+  final ShoppyAdminModel _model = ShoppyAdminModel();
 
+
+  bool get clickedCancelPrint => _clickedCancelPrint;
   OrderState get orderState => _orderState;
   bool get isClickedPrintAll => _isClickedPrintAll;
   int get bbqSuccess => _bbqSuccess;
   int get kitchenSuccess => _kitchenSuccess;
   int get barSuccess => _barSuccess;
   int get counterSuccess => _counterSuccess;
+
+
+  set clickedCancelPrint(bool value) {
+    _clickedCancelPrint = value;
+    notifyListeners();
+  }
 
   set orderState(OrderState value) {
     _orderState = value;
@@ -52,8 +68,10 @@ class PrintReceiptBloc extends ChangeNotifier{
     notifyListeners();
   }
 
-  PrintReceiptBloc(){
-
+  PrintReceiptBloc(int tableId,int orderNumber,List<OrderDetailsVo> orderItems){
+    _tableId = tableId;
+    _orderNumberValue = orderNumber;
+    _orderItems = orderItems;
   }
 
   void changePrintState(String name,int state){
@@ -63,7 +81,7 @@ class PrintReceiptBloc extends ChangeNotifier{
       _bbqSuccess = state;
     }
     else if(name == BAR) {
-      _barSuccess == state;
+      _barSuccess = state;
     }
     else if(name == COUNTER) {
       _counterSuccess = state;
@@ -74,8 +92,34 @@ class PrintReceiptBloc extends ChangeNotifier{
   Future<void> sendOrderToServer() async{
     _orderState = OrderState.loading;
     notifyListeners();
-    await Future.delayed(const Duration(seconds: 3));
-    _orderState = OrderState.success;
-    notifyListeners();
+    var newOrder = getOrderRequest();
+    _model.addOrderItem(newOrder).then((onValue){
+      _orderState = OrderState.success;
+      notifyListeners();
+    }).catchError((onError){
+      _orderState = OrderState.error;
+      notifyListeners();
+    });
+  }
+
+  AddOrderRequest getOrderRequest(){
+    List<AddOrderItemRequest> requestItems = [];
+    for(final item in _orderItems){
+      requestItems.add(
+        AddOrderItemRequest(
+          item.itemId,
+          0,
+          item.quantity,
+          int.parse(item.itemPrice),
+          item.remark ?? '',
+          0
+        ),
+      );
+    }
+    return AddOrderRequest(
+      _tableId,
+      _orderNumberValue,
+      requestItems
+    );
   }
 }

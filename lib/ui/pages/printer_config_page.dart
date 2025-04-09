@@ -108,11 +108,11 @@ class _PrinterConfigPageState extends State<PrinterConfigPage> {
                       onPressed: (){
                         _showPairedDevicesBottomSheet(context, context.read<PrinterService>());
                       },
-                      child: const Text('Copy',style: TextStyle(color: Colors.white),));
+                      child: const Text('Printers',style: TextStyle(color: Colors.white),));
                 }else{
                   return TextButton(
                       onPressed: (){},
-                      child: const Text('Not found'));
+                      child: const Text('Not found',style: TextStyle(color: Colors.white)));
                 }
               },
             )
