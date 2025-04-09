@@ -7,6 +7,7 @@ class AuthProvider extends ChangeNotifier{
   String _password = '';
   String _url = '';
   String _empName ='';
+  int _userId = 0;
   String _restName = '';
   String _layout = 'list';
 
@@ -14,6 +15,7 @@ class AuthProvider extends ChangeNotifier{
   String get layout => _layout;
   String get url => _url;
   String get empName => _empName;
+  int get userId => _userId;
   String get password => _password;
   String get userName => _userName;
 
@@ -30,6 +32,7 @@ class AuthProvider extends ChangeNotifier{
     SharedPreferences prefs = await SharedPreferences.getInstance();
     _restName = prefs.getString('restName') ?? '';
     _empName = prefs.getString('empName') ?? '';
+    _userId = prefs.getInt('userId') ?? 0;
     _userName = prefs.getString('name') ?? '';
     _password = prefs.getString('password') ?? '';
     _url = prefs.getString('url') ?? '';
@@ -45,14 +48,16 @@ class AuthProvider extends ChangeNotifier{
     notifyListeners();
   }
 
-  Future<void> saveTokenToDatabase(String name,String password,String empName) async{
+  Future<void> saveTokenToDatabase(String name,String password,String empName,int userId) async{
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('empName', empName);
     await prefs.setString('name', name);
     await prefs.setString('password', password);
+    await prefs.setInt('userId', userId);
     _empName = empName;
     _userName = name;
     _password = password;
+    _userId = userId;
     notifyListeners();
   }
 
@@ -61,6 +66,7 @@ class AuthProvider extends ChangeNotifier{
     await prefs.remove('empName');
     await prefs.remove('name');
     await prefs.remove('password');
+    _userId = 0;
     _empName = '';
     _userName = '';
     _password = '';
@@ -73,6 +79,7 @@ class AuthProvider extends ChangeNotifier{
     await prefs.remove('token');
     await prefs.remove('refresh_token');
     await prefs.remove('url');
+    _userId = 0;
     _empName = '';
     _userName = '';
     _url = '';

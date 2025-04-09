@@ -12,6 +12,9 @@ class AddOrderItemRequest{
   @JsonKey(name: 'orderItemQuantity')
   final int quantity;
 
+  @JsonKey(name: 'ordered_by')
+  final int orderedBy;
+
   @JsonKey(name: 'price')
   final int price;
 
@@ -22,7 +25,14 @@ class AddOrderItemRequest{
   final int isFoc;
 
   AddOrderItemRequest(
-      this.orderItemId, this.isOrdered, this.quantity, this.price, this.remark, this.isFoc);
+    this.isFoc, {
+      required this.orderedBy,
+      required this.price,
+      required this.orderItemId,
+      required this.isOrdered,
+      required this.quantity,
+      required this.remark,
+  });
 
   factory AddOrderItemRequest.fromJson(Map<String, dynamic> json) => _$AddOrderItemRequestFromJson(json);
 

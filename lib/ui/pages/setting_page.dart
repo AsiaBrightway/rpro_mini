@@ -54,6 +54,7 @@ class _SettingPageState extends State<SettingPage> {
 
   String restaurantName = '';
   String empName = '';
+  int userId = 0;
   PrinterService? _printerService;
   List<PrinterConfig> printers = [];
 
@@ -68,6 +69,7 @@ class _SettingPageState extends State<SettingPage> {
 
     final authModel = Provider.of<AuthProvider>(context,listen: false);
     empName = authModel.empName;
+    userId = authModel.userId;
     restaurantName = authModel.restName;
   }
 
@@ -85,149 +87,182 @@ class _SettingPageState extends State<SettingPage> {
     }
   }
 
-  Future<void> _captureAndPrintOrders(List<OrderDetailsVo> orderItems,PrintReceiptBloc bloc) async {
+  Future<void> _captureAndPrintOrders(
+      List<OrderDetailsVo> orderItems, PrintReceiptBloc bloc) async {
     try {
-      List<Future<Uint8List?>> imageFutures = [];
+      // Map to hold captured images for each category
+      Map<int, Uint8List?> capturedImages = {};
 
-      // Dynamically add screenshot captures based on the order items
+      // Capture images by using the appropriate screenshot controller for each order type.
+      // We add tasks to a list and then wait for them sequentially.
+      List<Future<void>> captureFutures = [];
       for (var item in orderItems) {
-        switch (item.mainCategoryId) {
-          case 3:
-            imageFutures.add(screenshotControllerBar.capture(delay: const Duration(milliseconds: 150)));
-            break;
-          case 1:
-            imageFutures.add(screenshotControllerKitchen.capture(delay: const Duration(milliseconds: 150)));
-            break;
-          case 2:
-            imageFutures.add(screenshotControllerBBQ.capture(delay: const Duration(milliseconds: 150)));
-            break;
-          case 4:
-            imageFutures.add(screenshotControllerCounter.capture(delay: const Duration(milliseconds: 150)));
-            break;
-          default:
-          // Handle any other cases or show an error
-            break;
-        }
-      }
-
-      // Wait for all relevant captures to complete.
-      List<Uint8List?> capturedImages = await Future.wait(imageFutures);
-
-      // Now, dynamically assign captured images based on item types.
-      for (int i = 0; i < orderItems.length; i++) {
-        var item = orderItems[i];
-        var image = capturedImages[i];
-
-        if (image != null) {
-          setState(() {
+        captureFutures.add(() async {
+          Uint8List? image;
+          try {
             switch (item.mainCategoryId) {
               case 3:
-                theBarImage = image;
+                image = await screenshotControllerBar.capture(
+                    delay: const Duration(milliseconds: 150));
                 break;
               case 1:
-                theKitchenImage = image;
+                image = await screenshotControllerKitchen.capture(
+                    delay: const Duration(milliseconds: 150));
                 break;
               case 2:
-                theBBQImage = image;
+                image = await screenshotControllerBBQ.capture(
+                    delay: const Duration(milliseconds: 150));
                 break;
               case 4:
-                theCounterImage = image;
+                image = await screenshotControllerCounter.capture(
+                    delay: const Duration(milliseconds: 150));
+                break;
+              default:
+              // Optionally log unsupported categories.
                 break;
             }
-          });
-        } else {
-          // Handle image capture failure
-          showAlertDialogBox(context, 'Capture Image Error', 'Failed to capture image for ${item.mainCategoryId}');
+          } catch (e) {
+            showAlertDialogBox(
+                context, 'Capture Image Error', 'Error capturing image for ${item.mainCategoryId}: $e');
+          }
+          if (image != null) {
+            // We assign or overwrite the capture for each category.
+            capturedImages[item.mainCategoryId] = image;
+          }
+        }());
+      }
+
+      // Wait for all capture tasks to finish.
+      await Future.wait(captureFutures);
+
+      // Validate captures. If any required image is missing, show an error.
+      for (var item in orderItems) {
+        if (capturedImages[item.mainCategoryId] == null) {
+          showAlertDialogBox(
+              context, 'Capture Image Error', 'Failed to capture image for ${item.mainCategoryId}');
         }
       }
+
+      // Mark that all prints are in progress.
       bloc.isClickedPrintAll = true;
-      // After all relevant images are captured, print each type accordingly
-      if (theBarImage != null) {
-        await _printOrder(3, theBarImage!,bloc);
-      }
 
-      if (theKitchenImage != null) {
-        await _printOrder(1, theKitchenImage!,bloc);
-      }
+      // Build the list of printing tasks in the desired order.
+      final printJobs = <Future<void> Function()>[
+        if (capturedImages.containsKey(3) && capturedImages[3] != null)
+              () => _printOrder(3, capturedImages[3]!, bloc),
+        if (capturedImages.containsKey(1) && capturedImages[1] != null)
+              () => _printOrder(1, capturedImages[1]!, bloc),
+        if (capturedImages.containsKey(2) && capturedImages[2] != null)
+              () => _printOrder(2, capturedImages[2]!, bloc),
+        if (capturedImages.containsKey(4) && capturedImages[4] != null)
+              () => _printOrder(4, capturedImages[4]!, bloc),
+      ];
 
-      if (theBBQImage != null) {
-        await _printOrder(2, theBBQImage!,bloc);
-      }
-
-      if (theCounterImage != null) {
-        await _printOrder(4, theCounterImage!,bloc);
+      bool firstJob = true;
+      for (final job in printJobs) {
+        if (firstJob) {
+          // Extra delay for the first print job.
+          await Future.delayed(const Duration(milliseconds: 600));
+          firstJob = false;
+        }
+        try {
+          await job();
+        } catch (printError) {
+          showAlertDialogBox(
+              context, 'Printing Error', 'Error in print job: $printError');
+        }
+        await Future.delayed(const Duration(milliseconds: 800));
       }
     } catch (error) {
-      showAlertDialogBox(context, 'Printing Error Capture', error.toString());
+      showAlertDialogBox(
+          context, 'Printing Error Capture', 'General error: $error');
     }
   }
 
-  Future<void> _printOrder(int orderType, Uint8List image,PrintReceiptBloc bloc) async {
-    // Based on the order type, call the correct printing method (Bluetooth/Network)
+  Future<void> _printOrder(
+      int orderType, Uint8List image, PrintReceiptBloc bloc) async {
+    // Retrieve the printer configuration for the given order type.
     PrinterConfig? config = _getPrinterConfigForOrderType(orderType);
     if (config != null) {
       if (config.type == 'Network') {
-        await _printViaNetwork(config, image,bloc);
+        await _printViaNetwork(config, image, bloc);
       } else if (config.type == 'Bluetooth') {
-        await _printViaBluetooth(config, image,bloc);
+        await _printViaBluetooth(config, image, bloc);
       } else {
-        showAlertDialogBox(context, 'Printing Error', 'Unsupported printer type for $orderType');
+        showAlertDialogBox(
+            context, 'Printing Error', 'Unsupported printer type for $orderType');
       }
     } else {
-      showAlertDialogBox(context, 'Printing Error', 'No printer configuration found for $orderType');
+      showAlertDialogBox(
+          context, 'Printing Error', 'No printer configuration found for $orderType');
     }
   }
 
-  Future<void> _printViaBluetooth(PrinterConfig config,Uint8List screenshotImage,PrintReceiptBloc bloc) async {
-    bloc.changePrintState(config.name, 1); // show loading
-    await _autoConnectSavedPrinter(config.address);
+  Future<void> _printViaBluetooth(
+      PrinterConfig config, Uint8List screenshotImage, PrintReceiptBloc bloc) async {
+    bloc.changePrintState(config.name, 1); // show loading state
     var printerBloc = context.read<PrinterService>();
-    final profile = await CapabilityProfile.load();
-    final generator = Generator(PaperSize.mm80, profile);
-    List<int> bytes = [];
-
-    bytes.addAll(_generateReceiptHeader(generator, config.name));
-
     try {
+      // Auto connect to the printer
+      await _autoConnectSavedPrinter(config.address);
+
+      final profile = await CapabilityProfile.load();
+      final generator = Generator(PaperSize.mm80, profile);
+      List<int> bytes = [];
+
+      // Generate header commands for receipt
+      bytes.addAll(_generateReceiptHeader(generator, config.name));
+
+      // Decode and process the image.
       final image = decodeImage(screenshotImage);
       if (image == null) {
         throw Exception("Failed to decode image.");
       }
-      final resizedImage = copyResize(image,width: 576);  // 80mm printers
-      bytes += generator.imageRaster(resizedImage);
-      bytes += generator.hr(ch: '- -');
+      final resizedImage = copyResize(image, width: 576); // For 80mm printers.
+      bytes.addAll(generator.imageRaster(resizedImage));
+      bytes.addAll(generator.hr(ch: '- -'));
+
+      // Write bytes to the printer.
       bool success = await PrintBluetoothThermal.writeBytes(bytes);
       if (success) {
         bloc.changePrintState(config.name, 2);
-        showSuccessScaffoldMessage(context, "Printing Success in ${config.name}");
+        showSuccessScaffoldMessage(context, "Printing success in ${config.name}");
       } else {
         bloc.changePrintState(config.name, 3);
-        showAlertDialogBox(context, 'Printing failed Bluetooth','Unknown Error, ${config.name} printer');
+        showAlertDialogBox(context, 'Printing Failed Bluetooth',
+            'Unknown error in printer ${config.name}');
       }
     } catch (e) {
       bloc.changePrintState(config.name, 3);
-      showAlertDialogBox(context, 'Bluetooth Printing failed', e.toString());
+      showAlertDialogBox(context, 'Bluetooth Printing Failed', e.toString());
     } finally {
+      // Ensuring proper disconnection
+      await Future.delayed(const Duration(milliseconds: 200));
       printerBloc.disconnectToDevice();
     }
   }
 
-  Future<void> _printViaNetwork(PrinterConfig config,Uint8List screenshotImage,PrintReceiptBloc bloc) async{
-    bloc.changePrintState(config.name, 1); // show loading
-    final profile = await CapabilityProfile.load();
-    final generator = Generator(PaperSize.mm80, profile);
-    List<int> bytes = [];
-    bytes.addAll(_generateReceiptHeader(generator, config.name));
-
-    final image = decodeImage(screenshotImage);
-    if (image == null) {
-      throw Exception("Failed to decode image.");
-    }
-    final resizedImage = copyResize(image,width: 576);  // 80mm printers
-    bytes += generator.imageRaster(resizedImage);
-    bytes += generator.cut();
-    String printerIp = config.address;
+  Future<void> _printViaNetwork(
+      PrinterConfig config, Uint8List screenshotImage, PrintReceiptBloc bloc) async {
+    bloc.changePrintState(config.name, 1); // show loading state
     try {
+      final profile = await CapabilityProfile.load();
+      final generator = Generator(PaperSize.mm80, profile);
+      List<int> bytes = [];
+      bytes.addAll(_generateReceiptHeader(generator, config.name));
+
+      // Decode and process the image.
+      final image = decodeImage(screenshotImage);
+      if (image == null) {
+        throw Exception("Failed to decode image.");
+      }
+      final resizedImage = copyResize(image, width: 576); // For 80mm printers.
+      bytes.addAll(generator.imageRaster(resizedImage));
+      await Future.delayed(const Duration(milliseconds: 800));
+      bytes.addAll(generator.cut());
+
+      String printerIp = config.address;
+      // Connect to the network printer.
       final socket = await Socket.connect(printerIp, 9100);
       socket.add(bytes);
       await socket.flush();
@@ -235,10 +270,8 @@ class _SettingPageState extends State<SettingPage> {
       bloc.changePrintState(config.name, 2);
       showSuccessScaffoldMessage(context, '${config.name} printing success');
     } catch (e) {
-      setState(() {
-        bloc.changePrintState(config.name, 3);
-      });
-      showAlertDialogBox(context, 'Printing failed Network ',e.toString());
+      bloc.changePrintState(config.name, 3);
+      showAlertDialogBox(context, 'Printing Failed Network', e.toString());
     }
   }
 
@@ -252,7 +285,7 @@ class _SettingPageState extends State<SettingPage> {
 
   List<int> _generateReceiptHeader(Generator generator, String printerName) {
     List<int> bytes = [];
-    if(widget.isCancel){
+    if (widget.isCancel) {
       bytes.addAll(generator.text(
         "Cancel Order",
         styles: const PosStyles(
@@ -262,7 +295,7 @@ class _SettingPageState extends State<SettingPage> {
           width: PosTextSize.size1,
         ),
       ));
-    }else{
+    } else {
       bytes.addAll(generator.text(
         restaurantName,
         styles: const PosStyles(
@@ -273,8 +306,8 @@ class _SettingPageState extends State<SettingPage> {
         ),
       ));
     }
-    bytes += generator.feed(1);
-    if(widget.isCancel == false){
+    bytes.addAll(generator.feed(1));
+    if (!widget.isCancel) {
       bytes.addAll(generator.text(
         '($printerName Orders)',
         styles: const PosStyles(
@@ -288,8 +321,8 @@ class _SettingPageState extends State<SettingPage> {
     bytes.addAll(generator.text(formattedDateTime));
     bytes.addAll(generator.text('${widget.floorName}, ${widget.tableName}, ${widget.groupName}'));
     bytes.addAll(generator.text(empName));
-    bytes += generator.feed(1);
-    if(widget.isCancel == false){
+    bytes.addAll(generator.feed(1));
+    if (!widget.isCancel) {
       bytes.addAll(generator.row([
         PosColumn(text: 'Name', width: 4, styles: _defaultStyle(PosAlign.left)),
         PosColumn(text: 'Unit', width: 2, styles: _defaultStyle(PosAlign.center)),
@@ -333,7 +366,7 @@ class _SettingPageState extends State<SettingPage> {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => PrintReceiptBloc(widget.tableId,widget.groupName,widget.orderItems),
+      create: (context) => PrintReceiptBloc(widget.tableId,widget.groupName,widget.orderItems,userId),
       builder: (context,child){
         var bloc = context.read<PrintReceiptBloc>();
         return Scaffold(
@@ -491,6 +524,7 @@ class _SettingPageState extends State<SettingPage> {
 
                         const SizedBox(height: 16),
 
+
                         // Display the Bar Order Screenshot Widget only if it's in the orderItems
                         if (widget.orderItems.any((item) => item.mainCategoryId == 3))
                           Row(
@@ -560,8 +594,8 @@ class _SettingPageState extends State<SettingPage> {
                                     }
                                     else if(counterState == 3){
                                       return IconButton(onPressed: (){
-                                        if(theBarImage == null) {
-                                          showToastMessage(context, 'Bar image is null');
+                                        if(theCounterImage == null) {
+                                          showToastMessage(context, 'Counter image is null');
                                           return;
                                         }
                                         _printOrder(4, theBarImage!,bloc);

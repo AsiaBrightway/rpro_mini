@@ -19,12 +19,12 @@ class PrintReceiptBloc extends ChangeNotifier{
   int _counterSuccess = 0;
   bool _isClickedPrintAll = false;
   int _tableId = 0;
+  int _userId = 0;
   int _orderNumberValue = 0;
   bool _clickedCancelPrint = false;
   List<OrderDetailsVo> _orderItems = [];
   OrderState _orderState = OrderState.initial;
   final ShoppyAdminModel _model = ShoppyAdminModel();
-
 
   bool get clickedCancelPrint => _clickedCancelPrint;
   OrderState get orderState => _orderState;
@@ -68,8 +68,9 @@ class PrintReceiptBloc extends ChangeNotifier{
     notifyListeners();
   }
 
-  PrintReceiptBloc(int tableId,int orderNumber,List<OrderDetailsVo> orderItems){
+  PrintReceiptBloc(int tableId,int orderNumber,List<OrderDetailsVo> orderItems,int userId){
     _tableId = tableId;
+    _userId = userId;
     _orderNumberValue = orderNumber;
     _orderItems = orderItems;
   }
@@ -107,12 +108,13 @@ class PrintReceiptBloc extends ChangeNotifier{
     for(final item in _orderItems){
       requestItems.add(
         AddOrderItemRequest(
-          item.itemId,
           0,
-          item.quantity,
-          int.parse(item.itemPrice),
-          item.remark ?? '',
-          0
+          quantity: item.quantity,
+          remark: item.remark ?? '',
+          orderedBy: _userId,
+          price: int.parse(item.itemPrice),
+          orderItemId: item.itemId,
+          isOrdered: 0
         ),
       );
     }

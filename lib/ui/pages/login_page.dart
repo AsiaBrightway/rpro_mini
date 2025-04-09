@@ -56,7 +56,12 @@ class _LoginPageState extends State<LoginPage> {
       _model.adminLogin(_userNameController.text, _passwordController.text).then((onValue){
         setState(() { isLoading = false; });
         final authModel = Provider.of<AuthProvider>(context,listen: false);
-        authModel.saveTokenToDatabase(_userNameController.text, _passwordController.text,onValue!.user.name);
+        authModel.saveTokenToDatabase(
+            _userNameController.text,
+            _passwordController.text,
+            onValue!.user.name,
+            onValue.user.id
+        );
         Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const HomePage()),(routes) => false);
 
       }).catchError((onError){
@@ -164,16 +169,19 @@ class _LoginPageState extends State<LoginPage> {
                   decoration: InputDecoration(
                     hintText: 'password',
                     errorText: _passwordErrorMessage,
-                    hintStyle: TextStyle(fontFamily: 'Ubuntu',
+                    hintStyle: TextStyle(
+                        fontFamily: 'Ubuntu',
                         fontSize: 14,
                         color: Theme.of(context).colorScheme.surfaceBright),
                     enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: AppColors
-                          .colorPrimary50), // Color when not focused
+                      borderSide: BorderSide(
+                          color: AppColors.colorPrimary50
+                      ), // Color when not focused
                     ),
                     focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: AppColors
-                          .colorPrimary), // Color when focused
+                      borderSide: BorderSide(
+                          color: AppColors.colorPrimary
+                      ), // Color when focused
                     ),
                     suffixIcon: IconButton(
                       icon: Icon(

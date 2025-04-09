@@ -13,7 +13,7 @@ class OrderDetailsVo {
   final int itemId;
 
   @JsonKey(name: 'main_category_id')
-  final int? mainCategoryId;
+  final int mainCategoryId;
 
   @JsonKey(name: 'batch_number')
   final int? batchNumber;

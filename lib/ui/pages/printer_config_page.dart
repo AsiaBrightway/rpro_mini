@@ -41,7 +41,6 @@ class _PrinterConfigPageState extends State<PrinterConfigPage> {
   Future<void> requestBluetoothPermissions() async {
     if (await Permission.bluetoothScan.isDenied ||
         await Permission.bluetoothConnect.isDenied) {
-      await Permission.bluetoothScan.request();
       await Permission.bluetoothConnect.request();
     }
 
