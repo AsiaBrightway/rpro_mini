@@ -43,8 +43,9 @@ class _UrlPageState extends State<UrlPage> {
     try{
       shoppyAdminAgent.updateBaseUrl(_urlController.text);
       authModel.saveUrl(_urlController.text,_restaurantController.text);
-      showSuccessToast(context, 'Url saved Successfully');
+      showSuccessScaffoldMessage(context, 'Url saved Successfully');
       await Future.delayed(const Duration(milliseconds: 300));
+      if(!mounted) return;
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginPage()));
     }catch(e){
       showAlertDialogBox(context, 'Url Error', e.toString());
@@ -100,7 +101,7 @@ class _UrlPageState extends State<UrlPage> {
                 child: TextField(
                   controller: _restaurantController,
                   decoration: InputDecoration(
-                    hintText: 'Enter Restaurant Name',
+                    hintText: 'Enter Restaurant Name(English)',
                     hintStyle: TextStyle(color: Theme.of(context).colorScheme.surfaceBright,fontFamily: 'Ubuntu',fontSize: 14),
                     enabledBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: AppColors.colorPrimary50), // Color when not focused

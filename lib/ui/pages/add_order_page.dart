@@ -304,16 +304,6 @@ class _AddOrderPageState extends State<AddOrderPage> {
                                   style: TextStyle(color: Theme.of(context).colorScheme.tertiary,fontFamily: 'Ubuntu',fontWeight: FontWeight.w600,fontSize: 16)
                               ),
                             ),
-                            Selector<AddOrderBloc,ItemState>(
-                                selector: (context,bloc) => bloc.itemState,
-                                builder: (context,itemState,_){
-                                  if(itemState == ItemState.loading){
-                                    return CupertinoActivityIndicator(color: AppColors.colorPrimary,);
-                                  }else{
-                                    return const SizedBox(width: 1);
-                                  }
-                                },
-                            ),
                             Row(
                               children: [
                                 IconButton(
@@ -350,90 +340,110 @@ class _AddOrderPageState extends State<AddOrderPage> {
                 selector: (context,bloc)=> bloc.layout,
                   builder: (context,layout,_){
                   var bloc = context.read<AddOrderBloc>();
-                  return Selector<AddOrderBloc,List<ItemVo>>(
-                      selector: (context,itemBloc) => itemBloc.items,
-                      builder: (context,itemList,_){
-                        _itemKeys = List.generate(itemList.length, (index) => GlobalKey());
-                        if(layout == 'grid'){
-                          return Expanded(
-                            child: GridView.builder(
-                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: crossAxisCount,
-                                childAspectRatio: 1,
-                                crossAxisSpacing: 10,
-                                mainAxisSpacing: 10,
+                  return Selector<AddOrderBloc,ItemState>(
+                      selector: (context,itemBloc) => itemBloc.itemState,
+                      builder: (context,itemStateCategory,_){
+                        if(itemStateCategory == ItemState.error){
+                          return const Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text('Connection Error',style: TextStyle(fontSize: 16,fontFamily: 'Ubuntu')),
+                                  SizedBox(height: 8,),
+                                  Text('fetching items by category'),
+                                ],
+                              )
+                          );
+                        }
+                        else if(itemStateCategory == ItemState.success){
+                          _itemKeys = List.generate(bloc.items.length, (index) => GlobalKey());
+                          if(layout == 'grid'){
+                            return Expanded(
+                              child: GridView.builder(
+                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: crossAxisCount,
+                                  childAspectRatio: 1,
+                                  crossAxisSpacing: 10,
+                                  mainAxisSpacing: 10,
+                                ),
+                                itemCount: bloc.items.length,
+                                itemBuilder: (context, index) {
+                                  return InkWell(
+                                    key: _itemKeys[index],
+                                    onTap: (){
+                                      _animateToCart(context, _itemKeys[index],bloc,bloc.items[index].itemId,bloc.items[index].image ?? '');
+                                      //Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingPage()));
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).colorScheme.primaryContainer,
+                                        border: Border.all(color: Colors.black38,width: 0.6),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          // 🖼 CachedNetworkImage Implementation
+                                          Expanded(
+                                            child: ClipRRect(
+                                              borderRadius: const BorderRadius.only(
+                                                topLeft: Radius.circular(10),
+                                                topRight: Radius.circular(10),
+                                              ),
+                                              child: CachedNetworkImage(
+                                                imageUrl: '$baseUrl/storage/Images/${bloc.items[index].image}',
+                                                width: double.infinity,
+                                                fit: BoxFit.cover,
+                                                errorWidget: (context, url, error) =>
+                                                    Expanded(
+                                                        child: Image.asset('assets/placeholder_image.jpg',fit: BoxFit.cover,)
+                                                    ),
+                                              ),
+                                            ),
+                                          ),
+                                          /// 📌 Title
+                                          Padding(
+                                            padding: const EdgeInsets.only(left: 8.0,top: 8),
+                                            child: Text(
+                                              bloc.items[index].itemName ?? '',
+                                              style: const TextStyle(fontSize: 14),
+                                              textAlign: TextAlign.center, // Center title
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.only(left: 8,right: 4,bottom: 4),
+                                            child: Text(
+                                              bloc.items[index].itemPrice ?? '',
+                                              style: const TextStyle(fontSize: 15,fontWeight: FontWeight.w700),
+                                              textAlign: TextAlign.center, // Center title
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
-                              itemCount: itemList.length,
-                              itemBuilder: (context, index) {
-                                return InkWell(
-                                  key: _itemKeys[index],
-                                  onTap: (){
-                                    _animateToCart(context, _itemKeys[index],bloc,itemList[index].itemId,itemList[index].image ?? '');
-                                    //Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingPage()));
-                                  },
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(context).colorScheme.primaryContainer,
-                                      border: Border.all(color: Colors.black38,width: 0.6),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        // 🖼 CachedNetworkImage Implementation
-                                        Expanded(
-                                          child: ClipRRect(
-                                            borderRadius: const BorderRadius.only(
-                                              topLeft: Radius.circular(10),
-                                              topRight: Radius.circular(10),
-                                            ),
-                                            child: CachedNetworkImage(
-                                              imageUrl: '$baseUrl/storage/Images/${itemList[index].image}',
-                                              width: double.infinity,
-                                              fit: BoxFit.cover,
-                                              errorWidget: (context, url, error) =>
-                                                  Expanded(
-                                                      child: Image.asset('assets/placeholder_image.jpg',fit: BoxFit.cover,)
-                                                  ),
-                                            ),
-                                          ),
-                                        ),
-                                        /// 📌 Title
-                                        Padding(
-                                          padding: const EdgeInsets.only(left: 8.0,top: 8),
-                                          child: Text(
-                                            itemList[index].itemName ?? '',
-                                            style: const TextStyle(fontSize: 14),
-                                            textAlign: TextAlign.center, // Center title
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.only(left: 8,right: 4,bottom: 4),
-                                          child: Text(
-                                            itemList[index].itemPrice ?? '',
-                                            style: const TextStyle(fontSize: 15,fontWeight: FontWeight.w700),
-                                            textAlign: TextAlign.center, // Center title
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          );
+                            );
+                          }
+                          else{
+                            return Expanded(
+                              child: SizedBox(
+                                  child: _buildListView(bloc.items,bloc)
+                              ),
+                            );
+                          }
                         }
-                        else{
+                        else {
                           return Expanded(
-                            child: SizedBox(
-                                child: _buildListView(itemList,bloc)
-                            ),
+                              child: Center(
+                                  child: CupertinoActivityIndicator(color: Theme.of(context).colorScheme.onSurface, radius: 14)
+                              )
                           );
                         }
-                      },
-                  );
-
+                      }
+                      );
                   },
               )
             ],

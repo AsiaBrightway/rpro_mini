@@ -76,7 +76,6 @@ class AddOrderBloc extends ChangeNotifier{
     });
   }
 
-
   void addOrUpdateOrderItem(int itemId) {
 
     ItemVo item = filterItemById(itemId);
@@ -134,11 +133,15 @@ class AddOrderBloc extends ChangeNotifier{
   }
 
   Future<void> getItemsByCategory(int categoryId) async{
+    _itemState = ItemState.loading;
+    notifyListeners();
     _model.getItemsByCategory(categoryId).then((onValue){
       _items = onValue ?? [];
+      _itemState = ItemState.success;
       notifyListeners();
     }).catchError((onError){
-
+      _itemState = ItemState.error;
+      notifyListeners();
     });
   }
 

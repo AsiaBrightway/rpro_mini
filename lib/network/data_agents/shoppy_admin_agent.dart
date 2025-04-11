@@ -4,7 +4,6 @@ import 'package:rpro_mini/data/vos/floor_vo.dart';
 import 'package:rpro_mini/data/vos/request/add_order_request.dart';
 import 'package:rpro_mini/network/responses/item_response.dart';
 import 'package:rpro_mini/network/responses/table_response.dart';
-import '../../data/vos/request/add_order_item_request.dart';
 import '../responses/add_response.dart';
 import '../responses/brand_response.dart';
 import '../responses/category_response.dart';

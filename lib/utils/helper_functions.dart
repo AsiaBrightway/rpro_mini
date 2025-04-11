@@ -32,9 +32,9 @@ void showSuccessScaffoldMessage(context,String name){
   ));
 }
 
-void showScaffoldMessage(context,String name){
+void showScaffoldMessage(BuildContext context,String name){
   ScaffoldMessenger.of(context).showSnackBar( SnackBar(
-    backgroundColor: Colors.grey.shade500,
+    backgroundColor: Colors.black87,
     content: Text(name,maxLines : 2,style: const TextStyle(fontSize: 15)),
     duration: const Duration(milliseconds: 1700),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

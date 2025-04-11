@@ -35,6 +35,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _onClickLogin() async {
+
     if (_userNameController.text.isEmpty) {
       setState(() {
         _nameErrorMessage = 'Username is require';
@@ -66,7 +67,7 @@ class _LoginPageState extends State<LoginPage> {
 
       }).catchError((onError){
         setState(() { isLoading = false; });
-        showAlertDialogBox(context, 'Login failed !', onError.toString());
+        showScaffoldMessage(context, onError.toString());
       });
     }
   }

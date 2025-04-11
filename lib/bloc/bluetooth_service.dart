@@ -32,7 +32,7 @@ class PrinterService extends ChangeNotifier {
       pairedDevices = await PrintBluetoothThermal.pairedBluetooths;
       notifyListeners();
     } catch (e) {
-      print("Error fetching paired devices: $e");
+      //print("Error fetching paired devices: $e");
     }
   }
 

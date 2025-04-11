@@ -11,7 +11,6 @@ import 'package:rpro_mini/network/responses/order_details_response.dart';
 import 'package:rpro_mini/network/responses/parse_error_logger.dart';
 import 'package:rpro_mini/network/responses/post_method_response.dart';
 import 'package:rpro_mini/network/responses/table_response.dart';
-import '../data/vos/request/add_order_item_request.dart';
 import 'api_constants.dart';
 
 part 'shoppy_api.g.dart';

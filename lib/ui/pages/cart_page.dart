@@ -8,7 +8,6 @@ import 'package:rpro_mini/data/vos/order_details_vo.dart';
 import 'package:rpro_mini/ui/components/item_cart.dart';
 import 'package:rpro_mini/ui/pages/setting_page.dart';
 import 'package:rpro_mini/ui/themes/colors.dart';
-import 'package:rpro_mini/utils/helper_functions.dart';
 import '../../bloc/add_order_bloc.dart';
 import '../../bloc/auth_provider.dart';
 
@@ -219,7 +218,7 @@ class _CartPageState extends State<CartPage> {
           builder: (context,itemState,_){
             var bloc = context.read<CartBloc>();
             if(itemState == ItemState.loading){
-              return Center(child: CupertinoActivityIndicator(color: Theme.of(context).colorScheme.primary,radius: 25));
+              return Center(child: CupertinoActivityIndicator(color: Theme.of(context).colorScheme.onSurface,radius: 14));
             }if(itemState == ItemState.error){
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
